@@ -169,7 +169,8 @@ opening a public issue.
 - **Windows daemon parity** — DNS + proxy + CA trust on Windows (in progress;
   the UI already runs there)
 - **Linux daemon** — same privileged layer for native Linux
-- **Fixed `.deb` packaging** — the AppImage is solid; the deb target needs work
+- **Native Linux packages** (`.deb`/`.rpm`) — AppImage ships today; real
+  packages need the release build on a Linux runner
 - **HTTPS upstream targets** — proxying to containers that themselves speak TLS
 - **Compose profile awareness** in the services view
 

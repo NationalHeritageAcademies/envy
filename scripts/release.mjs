@@ -10,7 +10,7 @@
 //   npm run release          — package (mac/win/linux) + upload
 //   npm run release:upload   — upload whatever already exists in dist/
 //
-// Files matched: .dmg, .exe, .AppImage, .deb, the -mac.zip auto-update
+// Files matched: .dmg, .exe, .AppImage, the -mac.zip auto-update
 // artifact, their .blockmap counterparts, and the electron-builder
 // auto-update manifests (latest*.yml). Anything else in dist/ (unpacked
 // dirs, builder-debug.yml, .DS_Store) is skipped.
@@ -36,7 +36,6 @@ const RELEASE_PATTERNS = [
   /\.exe$/,
   /\.exe\.blockmap$/,
   /\.AppImage$/,
-  /\.deb$/,
   /^latest.*\.yml$/,
 ];
 
