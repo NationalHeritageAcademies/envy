@@ -1,0 +1,16 @@
+{
+    "app": {
+        "name": "Envy",
+        "tagline": "Every Docker container gets a real HTTPS URL.",
+        "domain": "envy.melodic.dev",
+        "debug": true
+    },
+    "links": {
+        "downloads": {
+            "macos": "https://github.com/MelodicDevelopment/envy/releases/download/v0.2.3/Envy-0.2.3-universal.dmg",
+            "windows": "https://github.com/MelodicDevelopment/envy/releases/download/v0.2.3/Envy%20Setup%200.2.3.exe"
+        },
+        "github": "https://github.com/MelodicDevelopment/envy",
+        "support_email": "support@melodic.dev"
+    }
+}

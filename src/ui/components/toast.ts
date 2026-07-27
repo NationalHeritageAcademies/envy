@@ -1,0 +1,66 @@
+// A tiny, dependency-free toast. Uses an aria-live region so screen readers
+// announce messages without stealing focus (WCAG). Auto-dismisses in 3.5s.
+
+export type ToastKind = 'info' | 'success' | 'error';
+
+let container: HTMLElement | null = null;
+
+function ensureContainer(): HTMLElement {
+  if (container) return container;
+  const el = document.createElement('div');
+  el.setAttribute('aria-live', 'polite');
+  el.style.cssText = [
+    'position:fixed',
+    'bottom:20px',
+    'right:20px',
+    'display:flex',
+    'flex-direction:column',
+    'gap:8px',
+    'z-index:1000',
+    'pointer-events:none',
+  ].join(';');
+  document.body.appendChild(el);
+  container = el;
+  return el;
+}
+
+const ACCENT: Record<ToastKind, string> = {
+  info: 'var(--ml-color-primary)',
+  success: 'var(--ev-live)',
+  error: 'var(--ml-color-danger)',
+};
+
+export function showToast(message: string, kind: ToastKind = 'info'): void {
+  const host = ensureContainer();
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.cssText = [
+    'pointer-events:auto',
+    'min-width:200px',
+    'max-width:380px',
+    'padding:10px 14px',
+    'border-radius:var(--ml-radius-lg, 10px)',
+    'background:var(--ev-card, #111726)',
+    `border:1px solid ${ACCENT[kind]}`,
+    `border-left:3px solid ${ACCENT[kind]}`,
+    'color:var(--ml-color-text, #e6ebf5)',
+    'font-family:var(--ml-font-sans)',
+    'font-size:13px',
+    'box-shadow:var(--ml-shadow-lg, 0 12px 28px rgba(0,0,0,.5))',
+    'opacity:0',
+    'transform:translateY(6px)',
+    'transition:opacity .18s ease-out, transform .18s ease-out',
+  ].join(';');
+  host.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(6px)';
+    setTimeout(() => toast.remove(), 200);
+  }, 3500);
+}

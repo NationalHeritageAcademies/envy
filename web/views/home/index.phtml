@@ -1,0 +1,521 @@
+<?php
+/**
+ * @var array<string,mixed> $config
+ */
+$dl = $config['links']['downloads'] ?? [];
+$supportEmail = $config['links']['support_email'] ?? '';
+$github = $config['links']['github'] ?? 'https://github.com/MelodicDevelopment/envy';
+$releases = $github . '/releases';
+
+// If any platform binary is configured the hero leads with a download and we
+// render a dedicated #download section; otherwise it points at GitHub Releases.
+$hasAnyDownload = false;
+foreach ($dl as $url) {
+	if (is_string($url) && $url !== '') { $hasAnyDownload = true; break; }
+}
+$downloadHref = $hasAnyDownload ? '#download' : $releases;
+
+// Screenshots are progressively swapped in — until the file is saved, the
+// dashed placeholder stays. Drop these PNGs into web/public/assets/img/.
+$imgDir = __DIR__ . '/../../public/assets/img';
+$hasHero    = is_file($imgDir . '/screenshot-hero.png');
+$hasDomains = is_file($imgDir . '/screenshot-domains.png');
+$hasTray    = is_file($imgDir . '/screenshot-tray.png');
+$hasCerts   = is_file($imgDir . '/screenshot-certs.png');
+$hasAnyInAction = $hasDomains || $hasTray || $hasCerts;
+?>
+
+<?php $this->beginSection('head'); ?>
+<script type="application/ld+json">
+{
+	"@context": "https://schema.org",
+	"@type": "SoftwareApplication",
+	"name": "Envy",
+	"applicationCategory": "DeveloperApplication",
+	"operatingSystem": "macOS, Windows, Linux",
+	"description": "Zero-config local HTTPS for your Docker containers. Every container gets a trusted https URL, with automatic DNS and a clean menu-bar app.",
+	"url": "https://envy.melodic.dev/",
+	"image": "https://envy.melodic.dev/assets/img/og.png",
+	"offers": {
+		"@type": "Offer",
+		"price": "0",
+		"priceCurrency": "USD",
+		"availability": "https://schema.org/InStock",
+		"url": <?= json_encode($releases) ?>
+
+	},
+	"license": "https://opensource.org/license/mit",
+	"publisher": {
+		"@type": "Organization",
+		"name": "Melodic Development",
+		"url": "https://melodic.dev/"
+	}
+}
+</script>
+<?php $this->endSection(); ?>
+
+<section class="hero">
+	<div class="container hero__inner">
+		<div class="hero__mark" aria-hidden="true">
+			<?= file_get_contents(__DIR__ . '/../partials/_hero-glyph.svg') ?>
+		</div>
+
+		<h1 class="hero__tagline">
+			Every Docker container gets a <span class="accent">real HTTPS URL.</span>
+		</h1>
+
+		<p class="hero__sub">
+			Stop juggling <code>localhost:3000</code>. Envy gives every container a
+			trusted <code>https://&lt;name&gt;.envy</code> URL — automatic DNS,
+			local certificates your browser actually trusts, zero config. Free and open source.
+		</p>
+
+		<div class="hero__cta">
+			<a id="hero-download" class="btn btn--primary btn--lg" href="<?= htmlspecialchars($downloadHref) ?>" data-dl-macos="<?= htmlspecialchars($dl['macos'] ?? '') ?>" data-dl-windows="<?= htmlspecialchars($dl['windows'] ?? '') ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+				<span class="hero-download__label">Download Envy</span>
+			</a>
+			<a class="btn btn--secondary btn--lg" href="<?= htmlspecialchars($github) ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+				View on GitHub
+			</a>
+		</div>
+
+		<div class="hero__meta">
+			<span>Free &amp; open source · MIT license</span>
+			<span class="dot">·</span>
+			<span>No account, no telemetry</span>
+			<span class="dot">·</span>
+			<span>macOS, Windows &amp; Linux</span>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="hero-screenshot">
+			<?php if ($hasHero): ?>
+				<img
+					class="hero-screenshot__img"
+					src="/assets/img/screenshot-hero.png"
+					alt="The Envy app listing Docker containers, each with its own https URL, and a menu-bar icon"
+					loading="eager"
+					decoding="async"
+				/>
+			<?php else: ?>
+				<div class="hero-screenshot__placeholder" aria-hidden="true">app screenshot goes here</div>
+			<?php endif; ?>
+		</div>
+	</div>
+</section>
+
+<section class="why">
+	<div class="container">
+		<span class="section-eyebrow">Why Envy?</span>
+		<h2 class="section-title">Local development should feel like production.</h2>
+		<p class="section-lede">
+			Real hostnames. Real HTTPS. The same URLs your app will use in production —
+			running on your laptop, against your Docker containers, with nothing to
+			configure.
+		</p>
+
+		<div class="why__grid">
+			<div class="why__card">
+				<span class="icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>
+				</span>
+				<h3>Names, not port numbers</h3>
+				<p>Your <code>api</code> container is <code>https://api.envy</code> — not <code>localhost:8080</code>. No more remembering which service is on which port, or fighting collisions when two of them want 3000.</p>
+			</div>
+
+			<div class="why__card">
+				<span class="icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+				</span>
+				<h3>HTTPS that just works</h3>
+				<p>OAuth redirects, secure cookies, <code>SameSite</code>, service workers — half of modern web dev assumes <code>https://</code>. Envy serves trusted TLS locally so your dev environment stops being the exception.</p>
+			</div>
+
+			<div class="why__card">
+				<span class="icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+				</span>
+				<h3>Nothing leaves your machine</h3>
+				<p>No tunnels, no cloud relay, no account. Envy runs a local DNS resolver and a private certificate authority on your own machine. Your traffic never hits the internet to get a hostname.</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section id="features" class="features">
+	<div class="container">
+		<span class="section-eyebrow">Features</span>
+		<h2 class="section-title">Everything, handled.</h2>
+		<p class="section-lede">
+			Point Envy at Docker and it does the tedious networking — DNS, certificates,
+			reverse proxy — so you don't touch <code>/etc/hosts</code> or nginx again.
+		</p>
+
+		<div class="features__grid">
+			<div class="feature">
+				<span class="icon" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+				</span>
+				<h3>Automatic HTTPS</h3>
+				<p>Every running container gets a trusted <code>https://&lt;name&gt;.envy</code> URL the moment it starts — no per-app setup, no self-signed warnings.</p>
+			</div>
+
+			<div class="feature">
+				<span class="icon" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>
+				</span>
+				<h3>Zero-config DNS</h3>
+				<p>A local resolver answers <code>*.envy</code> instantly — wildcard, no <code>/etc/hosts</code> edits, no dnsmasq to babysit. New container, new name, immediately.</p>
+			</div>
+
+			<div class="feature">
+				<span class="icon" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+				</span>
+				<h3>Custom domains</h3>
+				<p>Want <code>shop.test</code> or <code>acme.localhost</code> instead? Add a suffix and assign it per container. Set a primary so new containers pick it up automatically.</p>
+			</div>
+
+			<div class="feature">
+				<span class="icon" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+				</span>
+				<h3>Trusted local certs</h3>
+				<p>Envy runs a private CA that your system and browsers trust, so the green padlock shows up with no <em>“Not secure”</em> banners and no clicking through warnings.</p>
+			</div>
+
+			<div class="feature">
+				<span class="icon" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+				</span>
+				<h3>Menu-bar &amp; tray control</h3>
+				<p>Start, stop, and restart containers right from the menu bar (or system tray on Windows/Linux) — grouped by Compose project, just like the app. Envy keeps serving your URLs in the background.</p>
+			</div>
+
+			<div class="feature">
+				<span class="icon" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+				</span>
+				<h3>Works with your Docker</h3>
+				<p>Docker Desktop, OrbStack, or colima — Envy talks to the local Docker socket you already have. Live activity, logs, and an exec shell are built in.</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<?php if ($hasAnyInAction): ?>
+<section id="in-action" class="in-action">
+	<div class="container">
+		<span class="section-eyebrow">See it in action</span>
+		<h2 class="section-title">Three things a screenshot tells better than a sentence.</h2>
+		<p class="section-lede">
+			No staged mockups. These are the real app, doing the real work.
+		</p>
+
+		<div class="in-action__grid">
+			<?php if ($hasDomains): ?>
+				<figure class="in-action__item">
+					<img
+						src="/assets/img/screenshot-domains.png"
+						alt="The Envy services list showing containers each with their own https domain URL"
+						loading="lazy"
+						decoding="async"
+					/>
+					<figcaption>
+						<h3>Every container, its own URL</h3>
+						<p>
+							Spin up a container and it appears with a live
+							<code>https://&lt;name&gt;.envy</code> link. Click to open it in
+							the browser — already trusted, already routed.
+						</p>
+					</figcaption>
+				</figure>
+			<?php endif; ?>
+
+			<?php if ($hasTray): ?>
+				<figure class="in-action__item">
+					<img
+						src="/assets/img/screenshot-tray.png"
+						alt="The Envy menu-bar icon open, showing containers grouped by Compose project with start and stop actions"
+						loading="lazy"
+						decoding="async"
+					/>
+					<figcaption>
+						<h3>Drive it from the menu bar</h3>
+						<p>
+							Containers grouped by Compose project, with start / stop / restart a
+							click away. Close the window and Envy keeps your URLs serving from the
+							menu bar.
+						</p>
+					</figcaption>
+				</figure>
+			<?php endif; ?>
+
+			<?php if ($hasCerts): ?>
+				<figure class="in-action__item">
+					<img
+						src="/assets/img/screenshot-certs.png"
+						alt="A browser address bar showing a trusted padlock on a .envy HTTPS URL"
+						loading="lazy"
+						decoding="async"
+					/>
+					<figcaption>
+						<h3>Trusted HTTPS, locally</h3>
+						<p>
+							Envy's local CA is trusted by your system, so <code>.envy</code>
+							URLs load over real, trusted HTTPS — the browser's secure-site
+							indicator, no warnings and no exceptions to click through.
+						</p>
+						<!-- (Safari and Firefox still show a literal padlock; Chrome shows its
+						     secure-site icon, as in the screenshot above.) -->
+					</figcaption>
+				</figure>
+			<?php endif; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
+<section id="compare" class="compare">
+	<div class="container">
+		<span class="section-eyebrow">Honest comparison</span>
+		<h2 class="section-title">How it compares.</h2>
+		<p class="section-lede">
+			There's more than one way to get a local hostname. Here's where Envy fits
+			against the usual approaches.
+		</p>
+
+		<div class="compare__table-wrap">
+			<table class="compare__table">
+				<thead>
+					<tr>
+						<th>What you want</th>
+						<th class="col-envy">Envy</th>
+						<th>hosts + nginx + mkcert</th>
+						<th>ngrok / tunnels</th>
+						<th>raw localhost</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Automatic per-container URLs</td>
+						<td class="col-envy yes">✓</td>
+						<td class="no">Manual</td>
+						<td class="no">One at a time</td>
+						<td class="no">Ports only</td>
+					</tr>
+					<tr>
+						<td>Trusted HTTPS, no warnings</td>
+						<td class="col-envy yes">✓</td>
+						<td>mkcert setup</td>
+						<td class="yes">✓ (remote)</td>
+						<td class="no">No</td>
+					</tr>
+					<tr>
+						<td>Wildcard DNS, no host edits</td>
+						<td class="col-envy yes">✓</td>
+						<td class="no">Edit hosts</td>
+						<td class="no">N/A</td>
+						<td class="no">N/A</td>
+					</tr>
+					<tr>
+						<td>Stays fully offline / private</td>
+						<td class="col-envy yes">✓</td>
+						<td class="yes">✓</td>
+						<td class="no">Cloud relay</td>
+						<td class="yes">✓</td>
+					</tr>
+					<tr>
+						<td>Setup effort</td>
+						<td class="col-envy yes">One click</td>
+						<td class="no">Hours of config</td>
+						<td>Per-session</td>
+						<td class="yes">None</td>
+					</tr>
+					<tr>
+						<td>Price</td>
+						<td class="col-envy yes">Free &amp; open source</td>
+						<td class="yes">Free / DIY</td>
+						<td>Free / $8+ mo</td>
+						<td class="yes">Free</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>
+
+<?php if ($hasAnyDownload): ?>
+<section id="download" class="download">
+	<div class="container">
+		<span class="section-eyebrow">Get Envy</span>
+		<h2 class="section-title">Download it. It's free.</h2>
+		<p class="section-lede">
+			Every feature, no account, no license keys. Grab a build below or from
+			<a href="<?= htmlspecialchars($releases) ?>">GitHub Releases</a> — or build it
+			from source.
+		</p>
+
+		<div class="download__grid">
+			<?php if (!empty($dl['macos'])): ?>
+				<a class="btn btn--primary btn--lg" href="<?= htmlspecialchars($dl['macos']) ?>">macOS (Universal)</a>
+			<?php endif; ?>
+			<?php if (!empty($dl['windows'])): ?>
+				<a class="btn btn--secondary btn--lg" href="<?= htmlspecialchars($dl['windows']) ?>">Windows</a>
+			<?php endif; ?>
+			<a class="btn btn--secondary btn--lg" href="<?= htmlspecialchars($releases) ?>">All releases</a>
+		</div>
+
+		<p class="download__note">
+			macOS (Apple Silicon &amp; Intel) · Windows 10/11 · Linux coming soon.
+			Envy installs a small background helper (one prompt) to serve DNS and HTTPS on
+			ports 53/80/443. You can remove it any time from the app.
+		</p>
+	</div>
+</section>
+<?php endif; ?>
+
+<section id="open-source" class="pricing">
+	<div class="container">
+		<span class="section-eyebrow">Open source</span>
+		<h2 class="section-title">Free. MIT-licensed. Yours.</h2>
+		<p class="section-lede">
+			Envy is open source under the MIT license. No license keys, no trials, no
+			account — and it runs entirely on your machine, so there's no server between
+			you and your containers. Read the code, file issues, send pull requests.
+		</p>
+
+		<div class="pricing__grid">
+			<div class="price-card price-card--featured">
+				<h3 class="price-card__name">Envy</h3>
+				<p class="price-card__tagline">For every developer</p>
+				<p class="price-card__price">
+					Free
+					<span class="period">MIT license</span>
+				</p>
+				<ul class="price-card__features">
+					<li>Native apps for macOS, Windows &amp; Linux</li>
+					<li>Unlimited containers &amp; custom domains</li>
+					<li>Trusted local HTTPS + automatic DNS</li>
+					<li>Use it on as many machines as you like</li>
+					<li>All updates included, forever</li>
+					<li>Source on GitHub — issues and PRs welcome</li>
+				</ul>
+				<a class="btn btn--primary btn--lg" href="<?= htmlspecialchars($github) ?>">View on GitHub</a>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+<section id="faq">
+	<div class="container">
+		<span class="section-eyebrow">FAQ</span>
+		<h2 class="section-title">Questions, answered.</h2>
+
+		<div class="faq">
+			<details class="faq__item">
+				<summary>Is Envy really free?</summary>
+				<p>
+					Yes. Envy is open source under the MIT license — every feature, free,
+					on every platform. No trial, no license keys, no account. The source
+					lives on <a href="<?= htmlspecialchars($github) ?>">GitHub</a>, and you
+					can build it yourself if you'd rather not use the prebuilt releases.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>How does Envy give containers a URL?</summary>
+				<p>
+					Envy watches your Docker socket and, for each container, publishes a
+					route on a small reverse proxy. A local DNS resolver answers
+					<code>*.envy</code> (and any custom suffixes you add), and a
+					private certificate authority issues the TLS cert — so
+					<code>https://&lt;name&gt;.envy</code> just resolves and loads.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>Does it need my password / sudo?</summary>
+				<p>
+					Once, at setup. Serving DNS and HTTPS on ports 53/80/443 and installing
+					a trusted local certificate authority require elevated privileges, so
+					Envy installs a small background helper behind a single password prompt
+					(your OS's standard elevation dialog). After that it runs on its own —
+					you can remove it any time from the app.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>Will my browser trust the HTTPS certificates?</summary>
+				<p>
+					Yes. Envy adds its local CA to your system trust store, so Safari,
+					Chrome, and Firefox show a normal padlock for <code>.envy</code>
+					URLs — no <em>“Not secure”</em> banner and no exceptions to click
+					through. The CA is local to your machine and never leaves it.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>Does it work offline?</summary>
+				<p>
+					Always. DNS, certificates, and routing all run locally — no internet
+					required, no account, and nothing phones home. The only network call
+					Envy ever makes is checking GitHub for app updates.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>Will it cost money later?</summary>
+				<p>
+					No. Envy is MIT-licensed open source — the code is public and free
+					forever. Even if the project ever changed direction, the source and
+					every released version stay available under MIT.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>Which Docker setups are supported?</summary>
+				<p>
+					Anything that exposes the standard local Docker socket — Docker Desktop,
+					OrbStack, and colima all work. Envy connects automatically when Docker is
+					running and reconnects on its own if you restart it.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>What platforms does Envy run on?</summary>
+				<p>
+					Envy runs on <strong>macOS</strong> (Apple Silicon &amp; Intel),
+					<strong>Windows</strong> 10/11, and <strong>Linux</strong> (AppImage and
+					.deb, x64 &amp; arm64). The same trusted local HTTPS works across all three.
+				</p>
+			</details>
+
+			<details class="faq__item">
+				<summary>What if I find a bug?</summary>
+				<p>
+					Open an issue on <a href="<?= htmlspecialchars($github) ?>/issues">GitHub</a>
+					with a description and (if possible) the steps to reproduce — or email
+					<a href="mailto:<?= htmlspecialchars($supportEmail) ?>"><?= htmlspecialchars($supportEmail) ?></a>.
+					Pull requests are welcome too.
+				</p>
+			</details>
+		</div>
+	</div>
+</section>
+
+<section>
+	<div class="container">
+		<div class="cta-strip">
+			<div class="cta-strip__inner">
+				<h2>Stop memorizing port numbers.</h2>
+				<p>Real names. Real HTTPS. Local. Free and open source.</p>
+				<a class="btn btn--primary btn--lg" href="<?= htmlspecialchars($downloadHref) ?>">Download Envy</a>
+			</div>
+		</div>
+	</div>
+</section>

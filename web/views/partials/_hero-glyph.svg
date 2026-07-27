@@ -1,0 +1,13 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+	<defs>
+		<radialGradient id="ev-hero-iris" cx="40%" cy="36%" r="72%">
+			<stop offset="0%" stop-color="#aef7d6"/>
+			<stop offset="52%" stop-color="#34d399"/>
+			<stop offset="100%" stop-color="#0b7a54"/>
+		</radialGradient>
+	</defs>
+	<circle cx="32" cy="32" r="29.6" fill="#34d399" opacity="0.16"/>
+	<circle cx="32" cy="32" r="18.4" fill="url(#ev-hero-iris)"/>
+	<circle cx="32" cy="32" r="7.5" fill="#04130c"/>
+	<circle cx="26.6" cy="26.2" r="2.9" fill="#eafff5" opacity="0.92"/>
+</svg>

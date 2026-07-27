@@ -1,0 +1,26 @@
+{
+    "name": "melodicdev/envy-web",
+    "description": "Marketing site for Envy — zero-config local HTTPS for your Docker containers",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.2",
+        "melodicdev/framework": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Site\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

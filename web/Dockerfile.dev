@@ -1,0 +1,43 @@
+# Local container image for the Envy marketing site.
+#
+# Named Dockerfile.dev on purpose: Railway auto-detects any file named
+# `Dockerfile` and silently switches off Nixpacks (breaking $PORT expansion in
+# its startCommand). This file is for local dev only — compose points at it.
+#
+#   docker build -f Dockerfile.dev -t envy-web .
+#   docker run --rm -p 8930:8080 --name envy-web envy-web
+#
+# Run it under OrbStack (or Docker Desktop) and Envy serves it at
+#   https://envy-web.envy.local
+#
+# This mirrors the Railway start command: PHP's built-in server on the single
+# public/index.php entry point. No DB, no FPM, no nginx — the site is static-ish.
+
+FROM php:8.2-cli-alpine
+
+# git + unzip let Composer fetch/extract dist packages cleanly on Alpine.
+RUN apk add --no-cache git unzip
+
+# Composer, copied straight from the official image (no global install needed).
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+# Install PHP deps first (cached unless composer.json/lock change), then the app.
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-progress --no-scripts --no-autoloader --prefer-dist
+
+COPY . .
+# Generate the optimized autoloader now that src/ is present.
+RUN composer dump-autoload --no-dev --optimize && composer clear-cache
+
+# Select production config (config.pd.json → debug off). Railway builds via this
+# Dockerfile, so it never sees nixpacks.toml's APP_ENV; set it here so prod
+# doesn't run with debug stack traces exposed.
+ENV APP_ENV=pd
+ENV PORT=8080
+EXPOSE 8080
+
+# Exec form via sh -c so ${PORT} still expands; the cli-server guard in
+# index.php serves the static assets under public/ directly.
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT} -t public public/index.php"]

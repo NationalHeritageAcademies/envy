@@ -1,0 +1,61 @@
+<article class="prose">
+	<h1>Privacy</h1>
+	<p>
+		Envy is a local-first developer tool. Everything it does — discovering your Docker
+		containers, resolving <code>*.envy</code> names, issuing certificates, and routing
+		HTTPS — happens <strong>entirely on your machine</strong>. We do not run a server for
+		your data, we do not have an account system, and we cannot see your containers, domains,
+		or traffic.
+	</p>
+
+	<h2>TL;DR</h2>
+	<ul>
+		<li>No account, no sign-in, no cloud sync.</li>
+		<li>No analytics or usage telemetry.</li>
+		<li>Your container list, domains, and settings live in files on your machine.</li>
+		<li>Envy makes exactly one kind of outbound connection, described below — which you can see and control.</li>
+	</ul>
+
+	<h2>What stays on your machine</h2>
+	<p>Envy stores its state in your user data directory and never uploads it:</p>
+	<ul>
+		<li><strong>Configuration</strong> — your domains and per-container assignments (<code>config.json</code>).</li>
+		<li><strong>App settings</strong> — preferences like keep-running and start-at-login (<code>settings.json</code>).</li>
+		<li><strong>Local certificate authority</strong> — the private CA used to sign <code>.envy</code> certs. Its key never leaves your machine.</li>
+	</ul>
+	<p>
+		Your container traffic is proxied locally between your browser and the Docker container.
+		It is never sent to us or any third party.
+	</p>
+
+	<h2>The one outbound connection Envy makes</h2>
+	<table>
+		<thead>
+			<tr><th>When</th><th>Where</th><th>Why</th></tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Checking for updates</td>
+				<td>GitHub Releases (<code>github.com</code>)</td>
+				<td>To see whether a newer version is available and download it. Sends only your current version + platform.</td>
+			</tr>
+		</tbody>
+	</table>
+	<p>
+		It carries no container names, domains, or any request/response content. Everything
+		else Envy does works fully offline.
+	</p>
+
+	<h2>Verifying nothing else is sent</h2>
+	<ul>
+		<li><strong>Read the source.</strong> Envy is open source — audit exactly what it does on <a href="https://github.com/MelodicDevelopment/envy" target="_blank" rel="noopener">GitHub</a>.</li>
+		<li><strong>Network monitor.</strong> With Little Snitch / Wireshark / <code>tcpdump</code>, confirm Envy makes no outbound connections beyond the update check.</li>
+		<li><strong>Local DNS only.</strong> <code>*.envy</code> lookups are answered by Envy's own resolver and never leave your machine.</li>
+	</ul>
+
+	<h2>Change log</h2>
+	<ul>
+		<li><strong>2026-07-26.</strong> Envy is now open source; license activation removed — the update check is the only outbound connection.</li>
+		<li><strong>2026-06-18.</strong> Initial version.</li>
+	</ul>
+</article>

@@ -1,0 +1,111 @@
+appId: dev.melodic.envy
+productName: Envy
+directories:
+  output: dist
+  buildResources: build
+afterSign: scripts/notarize.cjs
+# Auto-update feed. electron-updater reads the latest*.yml manifest attached to
+# the newest GitHub release and pulls the matching artifact (mac .zip, win .exe,
+# linux AppImage). `npm run release` packages and uploads the artifacts there.
+publish:
+  - provider: github
+    owner: MelodicDevelopment
+    repo: envy
+# Envy ships no native module it needs at runtime — it talks to the local
+# Docker socket, never a remote ssh:// host. The only native deps in the tree
+# (cpu-features + ssh2's sshcrypto, pulled transitively by dockerode → ssh2)
+# are SSH crypto accelerators that ssh2 falls back to pure JS for when absent.
+# Skipping the rebuild avoids node-gyp cross-compiling x64 from source on an
+# arm64 Mac during the universal build (which it cannot do).
+npmRebuild: false
+files:
+  - out/**/*
+  - package.json
+  - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}"
+  - "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}"
+  - "!**/node_modules/*.d.ts"
+  - "!**/node_modules/.bin"
+  # Drop the unused SSH-only native modules entirely so the universal lipo
+  # merge has no arch-specific .node to reconcile (ssh2 → pure-JS fallback).
+  - "!**/node_modules/cpu-features/**"
+  - "!**/node_modules/ssh2/lib/protocol/crypto/build/**"
+# The privileged daemon (self-contained bundle) + its install scripts ship as
+# resources so daemon-control can find them at process.resourcesPath.
+extraResources:
+  - from: out/daemon
+    to: out/daemon
+  - from: scripts
+    to: scripts
+    filter:
+      - "*.sh"
+      - "*.ps1"
+asarUnpack:
+  - "**/*.{node,dll}"
+mac:
+  target:
+    - target: dmg
+      arch: universal
+    - target: zip
+      arch: universal
+  category: public.app-category.developer-tools
+  icon: build/icon.png
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: false
+  # Named, explained prompt when Envy dials container IPs (OrbStack's subnet) to
+  # route tier-2 URLs — otherwise macOS labels the Local Network request with a
+  # same-team sibling app's name (e.g. Coax) instead of Envy's.
+  extendInfo:
+    NSLocalNetworkUsageDescription: >-
+      Envy connects to your Docker containers' local network addresses to route
+      your .envy URLs to them.
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.png
+  # Cross-platform Authenticode signing via Azure Trusted Signing. The hook
+  # shells out to `jsign` and is a no-op outside Windows targets (and when
+  # SKIP_WIN_SIGN=1 for local test builds). See scripts/sign-windows.cjs for
+  # the required env vars + setup. (electron-builder 25 moved sign/
+  # signingHashAlgorithms under signtoolOptions.)
+  signtoolOptions:
+    sign: scripts/sign-windows.cjs
+    signingHashAlgorithms:
+      - sha256
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.png
+  category: Development
+  maintainer: Rick Hopkins <support@melodic.dev>
+  vendor: Melodic Development
+dmg:
+  title: Envy ${version}
+  background: build/background.png
+  iconSize: 120
+  window:
+    width: 660
+    height: 400
+  contents:
+    - x: 165
+      y: 232
+      type: file
+    - x: 495
+      y: 232
+      type: link
+      path: /Applications
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

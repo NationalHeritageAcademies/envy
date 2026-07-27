@@ -1,0 +1,32 @@
+# Run the Envy marketing site in a container so Envy can serve it locally.
+#
+#   docker compose -f web/docker-compose.yml up --build -d
+#
+# Envy then lists "envy-web" with a URL at https://envy-web.<domain>
+# (the explicit container_name wins over the Compose service name, which would
+# otherwise collide with any other project's "web" service). OrbStack and native
+# Linux route the exposed port directly; the published port below also makes it
+# work on Docker Desktop, where container IPs aren't host-routable.
+# Explicit project name — without it, compose uses the directory name ("web"),
+# which collides with every other product's web/ compose project.
+name: envy-web
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: envy-web
+    container_name: envy-web
+    ports:
+      # host:container — host side is 8930 to avoid the common 8080 collision;
+      # the container always listens on 8080 (and envy.port points there).
+      - "8930:8080"
+    labels:
+      # Pin the upstream port Envy proxies to (the app's built-in server).
+      envy.port: "8080"
+      # Optional — force a specific hostname instead of the service name:
+      # envy.host: "envy"
+      # Optional — restrict to specific configured domains:
+      # envy.domains: "envy-web.envy.local"
+    restart: unless-stopped

@@ -1,0 +1,18 @@
+node_modules/
+out/
+dist/
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+# Local CA + generated certs live in the user's data dir at runtime, but
+# never commit any that land in the repo during development.
+*.pem
+*.key
+# Ignore local Claude state but ship the project skills (matches tapedeck/coax)
+.claude/*
+!.claude/skills/

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "useDefineForClassFields": false,
+    "experimentalDecorators": true,
+    "verbatimModuleSyntax": false,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@engine/*": ["src/engine/*"],
+      "@ipc/*": ["src/ipc/*"],
+      "@app/*": ["src/app/*"],
+      "@ui/*": ["src/ui/*"]
+    }
+  }
+}

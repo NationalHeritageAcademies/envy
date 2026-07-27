@@ -1,0 +1,5 @@
+# Envy marketing site
+User-agent: *
+Allow: /
+
+Sitemap: https://envy.melodic.dev/sitemap.xml

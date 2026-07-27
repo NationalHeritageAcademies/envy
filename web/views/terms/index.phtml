@@ -1,0 +1,74 @@
+<?php
+/**
+ * @var array<string,mixed> $config
+ */
+$supportEmail = $config['links']['support_email'] ?? 'support@melodic.dev';
+$github = $config['links']['github'] ?? 'https://github.com/MelodicDevelopment/envy';
+?>
+
+<article class="prose">
+	<h1>Envy — Terms of Use</h1>
+	<p class="legal-meta">
+		Effective July 26, 2026 · Copyright © Melodic Development
+	</p>
+	<p>
+		Envy is free, open-source software. These terms are intentionally short: the software
+		itself is governed by the MIT license, and this page just spells out what that means
+		and adds the usual disclaimers for the website.
+	</p>
+
+	<h2>1. License</h2>
+	<p>
+		Envy — the desktop application, its background helper, and the source code — is
+		licensed under the <a href="https://opensource.org/license/mit" target="_blank" rel="noopener">MIT
+		License</a>. The full license text ships with the software and lives in the
+		<a href="<?= htmlspecialchars($github) ?>/blob/main/LICENSE">LICENSE file on GitHub</a>.
+		In short: you may use, copy, modify, merge, publish, distribute, sublicense, and/or
+		sell copies of the software, for any purpose, personal or commercial, provided the
+		copyright notice and license text are included in all copies or substantial portions.
+	</p>
+
+	<h2>2. No warranty</h2>
+	<p>
+		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+		INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+		PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+		HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+		CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE
+		OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. (This is the MIT license's own
+		disclaimer — it applies in full.)
+	</p>
+
+	<h2>3. Privacy and telemetry</h2>
+	<p>
+		Envy does not collect analytics or transmit information about your use, data, or
+		activity. It runs locally; its only outbound connection is checking GitHub for app
+		updates. See our <a href="/privacy">privacy policy</a> for the full detail.
+	</p>
+
+	<h2>4. Third-party components</h2>
+	<p>
+		Envy includes open-source components licensed under their own terms. Those licenses
+		are noted in the repository's dependency manifests and are unaffected by these terms.
+	</p>
+
+	<h2>5. Trademarks</h2>
+	<p>
+		The MIT license covers the code, not the Envy name or logo. Please don't present a
+		modified build as an official Melodic Development release.
+	</p>
+
+	<h2>6. This website</h2>
+	<p>
+		The content of this website is provided for information only, "as is" and without
+		warranty. Download links point to builds published on
+		<a href="<?= htmlspecialchars($github) ?>/releases">GitHub Releases</a>.
+	</p>
+
+	<h2>Contact</h2>
+	<p>
+		Questions may be directed to Melodic Development at
+		<a href="mailto:<?= htmlspecialchars($supportEmail) ?>"><?= htmlspecialchars($supportEmail) ?></a>,
+		or open an issue on <a href="<?= htmlspecialchars($github) ?>/issues">GitHub</a>.
+	</p>
+</article>

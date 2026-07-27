@@ -1,0 +1,44 @@
+<!-- Envy app icon (1024x1024)
+     Matches the in-app brand mark: a dark rounded card with a subtle vertical
+     gradient + top highlight + faint border, and the Envy "eye" glyph — an
+     emerald radial iris, dark pupil, and white catchlight — with a green glow. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#141a17"/>
+      <stop offset="100%" stop-color="#0a0c0b"/>
+    </linearGradient>
+    <linearGradient id="hilite" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="40%" cy="36%" r="72%">
+      <stop offset="0%" stop-color="#aef7d6"/>
+      <stop offset="52%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#0b7a54"/>
+    </radialGradient>
+    <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.55"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="224" fill="url(#hilite)"/>
+  <rect x="2" y="2" width="1020" height="1020" rx="222"
+        fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="2"/>
+
+  <g filter="url(#glow)">
+    <circle cx="512" cy="512" r="470" fill="#34d399" opacity="0.16"/>
+    <circle cx="512" cy="512" r="300" fill="url(#iris)"/>
+    <circle cx="512" cy="512" r="122" fill="#04130c"/>
+    <circle cx="426" cy="420" r="46" fill="#eafff5" opacity="0.92"/>
+  </g>
+</svg>

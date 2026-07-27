@@ -1,0 +1,16 @@
+# Rebuilt inside the image — never copy the host's installed deps/runtime.
+vendor/
+storage/cache/*
+storage/logs/*
+config/config.dev.json
+.env
+.env.local
+.phpunit.cache
+.git/
+.DS_Store
+
+# Not needed in the runtime image.
+Dockerfile.dev
+.dockerignore
+docker-compose.yml
+README.md

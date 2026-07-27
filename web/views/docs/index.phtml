@@ -1,0 +1,245 @@
+<?php
+/**
+ * @var \Melodic\View\ViewBag $viewBag
+ * @var array<string,mixed>   $config
+ */
+$github = $config['links']['github'] ?? 'https://github.com/MelodicDevelopment/envy';
+$support = $config['links']['support_email'] ?? '';
+$dl = $config['links']['downloads'] ?? [];
+$macDl = $dl['macos'] ?? '/#download';
+?>
+<div class="docs">
+	<aside class="docs__sidebar">
+		<nav class="docs-nav" aria-label="Documentation">
+			<p class="docs-nav__group">Getting started</p>
+			<a href="#install" class="docs-nav__link">Install</a>
+			<a href="#enable" class="docs-nav__link">Enable your URLs</a>
+			<a href="#how-it-works" class="docs-nav__link">How it works</a>
+
+			<p class="docs-nav__group">Using Envy</p>
+			<a href="#urls" class="docs-nav__link">Container URLs</a>
+			<a href="#domains" class="docs-nav__link">Custom domains</a>
+			<a href="#per-container" class="docs-nav__link">Per-container domains</a>
+			<a href="#certs" class="docs-nav__link">Certificates &amp; trust</a>
+			<a href="#menu-bar" class="docs-nav__link">Menu bar &amp; tray</a>
+			<a href="#settings" class="docs-nav__link">Settings</a>
+			<a href="#updates" class="docs-nav__link">Updates</a>
+
+			<p class="docs-nav__group">Reference</p>
+			<a href="#license" class="docs-nav__link">License &amp; source</a>
+			<a href="#data" class="docs-nav__link">Where your data lives</a>
+			<a href="#docker" class="docs-nav__link">Docker providers</a>
+			<a href="#troubleshooting" class="docs-nav__link">Troubleshooting</a>
+			<a href="#uninstall" class="docs-nav__link">Uninstall</a>
+			<a href="#support" class="docs-nav__link">Questions?</a>
+		</nav>
+	</aside>
+
+	<article class="prose docs__content">
+		<h1>Envy documentation</h1>
+		<p class="lede">
+			Envy gives every Docker container a trusted <code>https://&lt;name&gt;.envy</code>
+			URL on your machine — automatic DNS, local certificates, and a reverse proxy, with nothing
+			to configure. This guide covers installing it, turning it on, and getting the most out
+			of it.
+		</p>
+
+		<h2 id="install">Install</h2>
+		<ol>
+			<li><strong>Download</strong> the build for your OS from the <a href="/#download">download section</a> — macOS (universal <code>.dmg</code>), Windows (<code>.exe</code> installer), or Linux (<code>.AppImage</code> / <code>.deb</code>, x64 &amp; arm64).</li>
+			<li><strong>Install.</strong> On macOS, drag <strong>Envy</strong> into <strong>Applications</strong>. On Windows, run the installer. On Linux, make the AppImage executable or install the <code>.deb</code>.</li>
+			<li><strong>Launch.</strong> Open Envy. It connects to your running Docker engine automatically and lists your containers.</li>
+		</ol>
+		<p>
+			Envy needs a Docker engine (Docker Desktop, OrbStack, or colima). If Docker isn't running,
+			Envy shows an offline state and connects on its own once it's up — see
+			<a href="#docker">Docker providers</a>.
+		</p>
+
+		<h2 id="enable">Enable your URLs</h2>
+		<p>
+			Listing containers works right away, but serving <code>https://</code> URLs needs a small
+			privileged helper. Click <strong>Enable URLs</strong> in the header and approve the single
+			elevation prompt (your OS's standard admin/password dialog). That one step installs a
+			background daemon and trusts Envy's local certificate authority.
+		</p>
+		<p>The daemon owns three things that require elevated privileges:</p>
+		<ul>
+			<li><strong>DNS</strong> on port 53, answering <code>*.envy</code> (and any custom suffixes).</li>
+			<li><strong>A reverse proxy</strong> on ports 80 and 443, routing each hostname to the right container.</li>
+			<li><strong>A trusted certificate authority</strong>, added to your system trust store so HTTPS has no warnings.</li>
+		</ul>
+		<p>
+			When the header pill reads <strong>URLs live</strong>, you're set. You can disable it any
+			time with the power button on the pill, which removes the daemon (one more password prompt).
+		</p>
+
+		<h2 id="how-it-works">How it works</h2>
+		<p>
+			Envy watches your Docker socket. For each container it publishes a route on the local
+			reverse proxy, derived from the Compose service name — or the container name, for
+			standalone containers and services with an explicit <code>container_name:</code> — plus any
+			<a href="#per-container">domains you assign</a>. The local DNS resolver answers the
+			matching hostnames, and the local CA issues a TLS certificate on demand — so opening
+			<code>https://api.envy</code> resolves to your <code>api</code> container over trusted
+			HTTPS. Nothing leaves your machine.
+		</p>
+
+		<h2 id="urls">Container URLs</h2>
+		<p>
+			By default each container is reachable at <code>https://&lt;name&gt;.envy</code>. For
+			Compose services, <code>&lt;name&gt;</code> is the <em>service</em> name — a
+			<code>gradebook</code> service is simply <code>https://gradebook.envy</code>, with no
+			project prefix or replica suffix. If you've pinned a name with
+			<code>container_name:</code> in your compose file, that name wins — handy when a shared
+			compose file can't carry Envy labels but you still want a specific URL. Standalone
+			containers use the container name. In the <strong>Services</strong> view, each container
+			card lists its live URLs — click one to open it in your browser, or copy it with the
+			copy button.
+		</p>
+		<p>
+			Containers are grouped by Compose project, so a multi-service stack shows up together. A
+			container needs to expose a port for Envy to route to it; if a container has no published or
+			exposed port, Envy shows <em>“no published URL.”</em>
+		</p>
+
+		<h2 id="domains">Custom domains</h2>
+		<p>
+			Prefer <code>shop.test</code> or <code>acme.localhost</code> over <code>.envy</code>?
+			Open the <strong>Domains</strong> view and add any suffix — Envy serves trusted HTTPS for it
+			immediately, no <code>/etc/hosts</code> edits required.
+		</p>
+		<ul>
+			<li>The <strong>primary</strong> suffix (the first in the list) is the default: every container gets a <code>&lt;name&gt;.&lt;primary&gt;</code> URL.</li>
+			<li>Use <strong>Make primary</strong> to promote another suffix; new and unassigned containers switch to it.</li>
+			<li>Remove a suffix and its URLs stop being served.</li>
+		</ul>
+
+		<h2 id="per-container">Per-container domains</h2>
+		<p>
+			To give a single container its own set of domains, open its <strong>Inspect</strong> drawer
+			(the domains chip on the card) and choose which suffixes it should answer on. A container
+			restricted this way is reachable only on the domains you pick.
+		</p>
+		<p>
+			You can also fix domains at the source with a Docker label. Setting
+			<code>envy.domains</code> on a container makes its domain assignment authoritative — the UI
+			shows it as locked, so the routing travels with your <code>docker run</code> command or
+			Compose file:
+		</p>
+		<pre><code>services:
+  api:
+    image: my/api
+    labels:
+      envy.domains: "api.acme.test"</code></pre>
+
+		<h2 id="certs">Certificates &amp; trust</h2>
+		<p>
+			Envy runs its own certificate authority and adds it to your system trust store when you
+			enable URLs, so Safari, Chrome, and Firefox show a normal padlock on <code>.envy</code>
+			URLs — no <em>“Not secure”</em> banner, no exceptions to click. The CA's private key stays on
+			your machine and is never transmitted. Removing the daemon (or uninstalling) removes the trust.
+		</p>
+
+		<h2 id="menu-bar">Menu bar &amp; system tray</h2>
+		<p>
+			Envy lives in your menu bar (macOS) or system tray (Windows / Linux). Click the icon for a
+			menu that mirrors the app:
+		</p>
+		<ul>
+			<li><strong>Containers</strong>, grouped by Compose project, with <strong>Start / Stop / Restart</strong> per container and <strong>Start all / Stop all</strong> per project.</li>
+			<li><strong>Show Envy</strong> to bring the window forward (disabled when it's already open).</li>
+			<li><strong>Keep Running in Background</strong>, <strong>Check for Updates…</strong>, <strong>Settings…</strong>, and <strong>Help</strong>.</li>
+		</ul>
+		<p>
+			With <em>Keep running in background</em> on, closing the window leaves Envy in the menu bar so
+			your URLs keep serving. Quitting from the menu (or ⌘Q) stops Envy entirely.
+		</p>
+
+		<h2 id="settings">Settings</h2>
+		<p>Open <strong>Settings</strong> from the gear in the sidebar or the menu bar:</p>
+		<ul>
+			<li><strong>Keep running in background</strong> — stay in the menu bar after the window closes.</li>
+			<li><strong>Start at login</strong> — launch Envy automatically when you log in.</li>
+			<li><strong>Updates</strong> — see your version and check for a new one on demand.</li>
+		</ul>
+
+		<h2 id="updates">Updates</h2>
+		<p>
+			Envy checks for updates in the background and downloads them automatically. When a new
+			version is ready, a <strong>Restart to update</strong> pill appears in the header — click it
+			to relaunch into the new version. You can also trigger a check any time from
+			<strong>Settings</strong> or the menu bar's <strong>Check for Updates…</strong>.
+		</p>
+
+		<h2 id="license">License &amp; source</h2>
+		<p>
+			Envy is <strong>free and open source</strong> under the
+			<a href="https://opensource.org/license/mit" target="_blank" rel="noopener">MIT license</a> —
+			every feature, on as many machines as you like, no account and no license keys.
+		</p>
+		<ul>
+			<li>The source lives at <a href="<?= htmlspecialchars($github) ?>"><?= htmlspecialchars(str_replace('https://', '', $github)) ?></a>.</li>
+			<li>Prebuilt binaries are published on <a href="<?= htmlspecialchars($github) ?>/releases">GitHub Releases</a>, or build it from source.</li>
+			<li>Bugs and feature requests go through <a href="<?= htmlspecialchars($github) ?>/issues">GitHub Issues</a>; pull requests are welcome.</li>
+		</ul>
+
+		<h2 id="data">Where your data lives</h2>
+		<p>
+			Envy keeps a small amount of state — <code>config.json</code> (domains &amp; per-container
+			assignments) and <code>settings.json</code> (app preferences) — in your OS's per-user
+			app data directory:
+		</p>
+		<pre><code>macOS    ~/Library/Application Support/Envy/
+Windows  %APPDATA%\Envy\
+Linux    ~/.config/Envy/</code></pre>
+		<p>
+			The privileged daemon and the local certificate authority are installed separately and are
+			removed when you disable URLs or uninstall. Nothing here is uploaded anywhere — see the
+			<a href="/privacy">privacy policy</a>.
+		</p>
+
+		<h2 id="docker">Docker providers</h2>
+		<p>
+			Envy talks to the standard local Docker socket, so <strong>Docker Desktop</strong>,
+			<strong>OrbStack</strong>, and <strong>colima</strong> all work. It connects automatically
+			when Docker is running and reconnects on its own if you restart the engine. If Docker isn't
+			installed, Envy points you to install it; if it's installed but stopped, Envy offers to start
+			it.
+		</p>
+		<p>
+			<strong>Note for Docker Desktop:</strong> container IPs aren't directly routable from the host
+			on Docker Desktop, so a container needs a <em>published</em> port (<code>-p</code>) for Envy to
+			reach it. On engines that do route container IPs — OrbStack, native Linux, or colima with a
+			routable network — exposing a port is enough. Envy checks this by actually probing a container
+			IP rather than assuming from the engine's name, so any provider that routes container IPs gets
+			the same treatment.
+		</p>
+
+		<h2 id="troubleshooting">Troubleshooting</h2>
+		<table>
+			<thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+			<tbody>
+				<tr><td>Header shows <em>Docker offline</em></td><td>Start Docker Desktop / OrbStack / colima. Envy reconnects automatically.</td></tr>
+				<tr><td>URL won't resolve</td><td>Make sure URLs are enabled (the <em>URLs live</em> pill). The DNS daemon must be running.</td></tr>
+				<tr><td>Browser still warns about the certificate</td><td>Re-enable URLs to re-install the local CA, then fully quit and reopen the browser so it reloads the trust store.</td></tr>
+				<tr><td>“No published URL” on a container</td><td>The container has no reachable port. On Docker Desktop, publish a port with <code>-p</code>.</td></tr>
+				<tr><td>Enabling URLs fails</td><td>Another service may hold port 53, 80, or 443. Stop it (e.g. a local nginx/Apache or another proxy) and try again.</td></tr>
+			</tbody>
+		</table>
+
+		<h2 id="uninstall">Uninstall</h2>
+		<ol>
+			<li>In Envy, disable URLs (the power button on the header pill) to remove the daemon and the trusted CA.</li>
+			<li>Quit Envy from the menu bar / system tray.</li>
+			<li>Remove the app: drag <strong>Envy</strong> to the Trash (macOS), uninstall it from Settings → Apps (Windows), or delete the AppImage / <code>apt remove envy</code> (Linux). Optionally delete the data directory listed above.</li>
+		</ol>
+
+		<h2 id="support">Questions?</h2>
+		<p>
+			Open an issue on <a href="<?= htmlspecialchars($github) ?>/issues">GitHub</a> or email
+			<a href="mailto:<?= htmlspecialchars($support) ?>"><?= htmlspecialchars($support) ?></a>.
+			We read everything.
+		</p>
+	</article>
+</div>
