@@ -18,11 +18,12 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-// Artifact filenames as electron-builder emits them (see electron-builder.yml /
-// productName "Envy"). encodeURI turns the spaces in the Windows name into %20.
+// Artifact filenames as they appear on GitHub Releases. Note: electron-builder
+// emits "Envy Setup x.y.z.exe" locally, but GitHub rewrites spaces to dashes
+// on upload — the released asset is "Envy-Setup-x.y.z.exe".
 const FILENAME_FOR = {
   macos: (v) => `Envy-${v}-universal.dmg`,
-  windows: (v) => encodeURI(`Envy Setup ${v}.exe`),
+  windows: (v) => `Envy-Setup-${v}.exe`,
 };
 
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
