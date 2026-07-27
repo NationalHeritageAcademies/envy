@@ -7,8 +7,8 @@
     },
     "links": {
         "downloads": {
-            "macos": "https://pub-7a0ad97b03ff4e7e8210a5e05be21066.r2.dev/Envy-0.2.3-universal.dmg",
-            "windows": "https://pub-7a0ad97b03ff4e7e8210a5e05be21066.r2.dev/Envy%20Setup%200.2.3.exe"
+            "macos": "https://github.com/MelodicDevelopment/envy/releases/download/v0.3.0/Envy-0.3.0-universal.dmg",
+            "windows": "https://github.com/MelodicDevelopment/envy/releases/download/v0.3.0/Envy-Setup-0.3.0.exe"
         },
         "github": "https://github.com/MelodicDevelopment/envy",
         "support_email": "support@melodic.dev"
