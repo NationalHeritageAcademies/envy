@@ -1,7 +1,7 @@
 {
   "name": "envy",
   "productName": "Envy",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "private": true,
   "license": "MIT",
   "author": "Rick Hopkins <support@melodic.dev>",
