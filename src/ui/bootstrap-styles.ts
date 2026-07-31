@@ -1,18 +1,19 @@
-// Inject the Melodic component stylesheet + Envy tokens at runtime (not via
-// index.html) so Vite's HTML plugin doesn't inline/rewrite them and strip the
-// `melodic-styles` attribute that gets the rules adopted into each component's
-// shadow root. Same approach Coax uses; see its bootstrap-styles for the full
-// rationale on the file:// and Vite failure modes this avoids.
+// Inject the Envy design-token stylesheet at runtime rather than linking it
+// from index.html.
+//
+// tokens.css ships verbatim via Vite's publicDir (src/ui/public), so
+// `./tokens.css` resolves next to index.html in both dev and the packaged app.
+// Injecting it from JS keeps Vite's HTML plugin from rewriting the href — an
+// absolute href like "/tokens.css" resolves to the filesystem root under
+// file:// in the packaged app, which silently drops every token and leaves the
+// UI unstyled.
+//
+// Angular's default (emulated) view encapsulation is attribute-based rather
+// than Shadow DOM, so these global rules reach component templates directly.
+// That is why Melodic's `melodic-styles` stylesheet-adoption attribute is gone:
+// there are no shadow roots left to adopt stylesheets into.
 
-const stylesheets = [
-  './melodic-components.css', // copied to renderer root by viteStaticCopy
-  './tokens.css', // copied verbatim from src/ui/public
-];
-
-for (const href of stylesheets) {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.setAttribute('melodic-styles', '');
-  link.href = href;
-  document.head.appendChild(link);
-}
+const link = document.createElement('link');
+link.rel = 'stylesheet';
+link.href = './tokens.css';
+document.head.appendChild(link);

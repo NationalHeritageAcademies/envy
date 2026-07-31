@@ -1,0 +1,62 @@
+<ev-dialog maxWidth="540px" (closed)="cancel()">
+	<div slot="dialog-header" class="hdr"><strong>Run a container</strong></div>
+
+	<div class="form">
+		<label>
+			<span>Image</span>
+			<input class="ev-input" placeholder="e.g. postgres:16" [value]="image()" (input)="onInput('image', $event)" />
+		</label>
+
+		<label>
+			<span>Name <em>(optional)</em></span>
+			<input class="ev-input" placeholder="auto if blank" [value]="name()" (input)="onInput('name', $event)" />
+		</label>
+
+		<label>
+			<span>Hostname <em>(optional)</em></span>
+			<input class="ev-input" placeholder="defaults to the container name" [value]="hostname()" (input)="onInput('hostname', $event)" />
+			<small
+				>The subdomain for its URL — e.g. <code>api</code> → <code>api.{{ primary() }}</code
+				>.</small
+			>
+		</label>
+
+		@if (domains().length) {
+			<label>
+				<span>Domains</span>
+				<div class="dchips">
+					@for (domain of domains(); track domain) {
+						<button type="button" class="dchip" [class.on]="selectedDomains().has(domain)" (click)="toggleDomain(domain)">*.{{ domain }}</button>
+					}
+				</div>
+			</label>
+		}
+
+		<label>
+			<span>Ports</span>
+			<input class="ev-input" placeholder="5432:5432, 8080:80" [value]="ports()" (input)="onInput('ports', $event)" />
+			<small>host:container, comma-separated. The published port becomes the service's URL.</small>
+		</label>
+
+		<label>
+			<span>Environment</span>
+			<textarea class="ev-textarea" rows="3" placeholder="KEY=value&#10;one per line" [value]="env()" (input)="onInput('env', $event)"></textarea>
+		</label>
+
+		<label>
+			<span>Volumes</span>
+			<textarea
+				class="ev-textarea"
+				rows="2"
+				placeholder="pgdata:/var/lib/postgresql/data&#10;/host/path:/in/container"
+				[value]="volumes()"
+				(input)="onInput('volumes', $event)"
+			></textarea>
+		</label>
+	</div>
+
+	<div slot="dialog-footer" class="ftr">
+		<button ev-button variant="ghost" (click)="cancel()">Cancel</button>
+		<button ev-button variant="primary" [disabled]="!image().trim() || busy()" (click)="submit()">{{ busy() ? 'Running…' : 'Run' }}</button>
+	</div>
+</ev-dialog>

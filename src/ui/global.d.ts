@@ -1,9 +1,9 @@
-import type { EnvyApi } from '../ipc/contract.js';
+import type { EnvyApi } from '../ipc/contract';
 
 declare global {
-  interface Window {
-    envy: EnvyApi;
-  }
+	interface Window {
+		envy: EnvyApi;
+	}
 }
 
 export {};

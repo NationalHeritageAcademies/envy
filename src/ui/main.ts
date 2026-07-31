@@ -1,33 +1,17 @@
 // FIRST import on purpose: registers the global error net before any component
 // module evaluates, so an import-time throw shows a fallback instead of black.
-import { fail } from './error-net.js';
+import { fail } from './error-net';
 
-import './bootstrap-styles.js';
+import './bootstrap-styles';
 
-// Melodic web components used across the app (side-effect registration).
-import '@melodicdev/components/button';
-import '@melodicdev/components/icon';
-import '@melodicdev/components/input';
-import '@melodicdev/components/textarea';
-import '@melodicdev/components/badge';
-import '@melodicdev/components/spinner';
-import '@melodicdev/components/dialog';
-import '@melodicdev/components/toggle';
-import { applyTheme } from '@melodicdev/components/theme';
+// xterm's stylesheet has to be global, not a component style: xterm builds its
+// own DOM imperatively after the view is created, so those nodes never get the
+// _ngcontent attribute that emulated encapsulation scopes rules by. See
+// shell-term.component.ts.
+import '@xterm/xterm/css/xterm.css';
 
-// Envy components.
-import './components/envy-app.js';
-import './components/services-view.js';
-import './components/images-view.js';
-import './components/domains-view.js';
-import './components/activity-view.js';
-import './components/inspect-drawer.js';
-import './components/run-dialog.js';
-import './components/settings-view.js';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
 
-import { bootstrap } from './store/actions.js';
-
-// Envy is a dark-first, calm operations surface (per the design system).
-applyTheme('dark');
-
-bootstrap().catch((err: unknown) => fail('bootstrap', err));
+bootstrapApplication(AppComponent, appConfig).catch((err: unknown) => fail('bootstrap', err));

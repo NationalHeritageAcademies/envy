@@ -1,0 +1,259 @@
+:host {
+	display: grid;
+	grid-template-columns: 232px 1fr;
+	grid-template-rows: minmax(0, 1fr);
+	height: 100vh;
+	overflow: hidden;
+	color: var(--ev-text);
+	position: relative;
+}
+
+/* Top-edge green glow behind the header */
+:host::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 232px;
+	right: 0;
+	height: 140px;
+	background: radial-gradient(70% 130px at 40% -25%, var(--ev-accent-dim), transparent 72%);
+	pointer-events: none;
+	z-index: 0;
+}
+
+.sidebar {
+	background: var(--ev-side);
+	border-right: 1px solid var(--ev-border);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 0 12px 14px;
+	-webkit-app-region: drag;
+}
+
+.traffic-pad {
+	height: 14px;
+}
+.traffic-pad.mac {
+	height: 38px; /* clears the OS traffic lights */
+}
+.traffic-pad.win {
+	height: 30px; /* breathing room under the frameless top edge */
+}
+
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	height: 44px;
+	padding: 0 6px;
+	margin-bottom: 6px;
+}
+
+.wordmark {
+	font-weight: 700;
+	font-size: 20px;
+	letter-spacing: -0.015em;
+}
+
+nav {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.nav {
+	-webkit-app-region: no-drag;
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 9px 12px;
+	border: none;
+	border-radius: 9px;
+	background: none;
+	color: var(--ev-dim);
+	font-family: var(--ev-font-sans);
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+
+.nav:hover {
+	color: var(--ev-text);
+	background: var(--ev-surface);
+}
+
+.nav.active {
+	color: var(--ev-accent);
+	background: var(--ev-accent-dim);
+}
+
+.side-foot {
+	-webkit-app-region: no-drag;
+	margin-top: auto;
+	padding-top: 12px;
+	border-top: 1px solid var(--ev-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.ver {
+	font-family: var(--ev-font-mono);
+	font-size: 11px;
+	color: var(--ev-faint);
+}
+
+.foot-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.foot-btn {
+	width: 30px;
+	height: 30px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: 8px;
+	background: none;
+	color: var(--ev-dim);
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+
+.foot-btn:hover {
+	background: var(--ev-surface);
+	color: var(--ev-text);
+}
+
+.foot-btn.active {
+	background: var(--ev-accent-dim);
+	color: var(--ev-accent);
+}
+
+main {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	position: relative;
+	z-index: 1;
+}
+
+header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 64px;
+	padding: 0 28px;
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--ev-border);
+	-webkit-app-region: drag;
+}
+
+/* Windows: keep the header actions clear of the top-right window-controls
+   overlay (min/max/close) so they're not covered or un-clickable. */
+header.win {
+	padding-right: 148px;
+}
+
+.htext {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+header h1 {
+	margin: 0;
+	font-size: 19px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.subtitle {
+	font-family: var(--ev-font-mono);
+	font-size: 12px;
+	color: var(--ev-dim);
+	white-space: nowrap;
+}
+
+.header-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+/* "Restart to update" pill — visible only while electron-updater has a staged
+   update waiting (updateReady non-null). */
+.update-pill {
+	-webkit-app-region: no-drag;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 6px 12px;
+	border-radius: 13px;
+	cursor: pointer;
+	background: var(--ev-accent-dim);
+	border: 1px solid var(--ev-accent-edge);
+	color: var(--ev-accent);
+	font-family: var(--ev-font-sans);
+	font-size: 12px;
+	font-weight: 600;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+
+.update-pill:hover {
+	background: var(--ev-accent);
+	color: var(--ev-accent-on);
+}
+
+.content {
+	flex: 1;
+	overflow-y: auto;
+}
+
+/* Daemon status pill */
+.pill {
+	-webkit-app-region: no-drag;
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 5px 5px 5px 13px;
+	border-radius: 13px;
+	background: var(--ev-surface);
+	border: 1px solid var(--ev-border);
+	font-size: 12px;
+	color: var(--ev-dim);
+}
+
+.pill.live {
+	background: var(--ev-accent-dim);
+	border-color: var(--ev-accent-edge);
+	color: var(--ev-text);
+}
+
+.pill .label {
+	font-family: var(--ev-font-mono);
+}
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--ev-faint);
+}
+
+.pill.live .dot {
+	background: var(--ev-accent);
+	animation: ev-pulse 2.4s ease-out infinite;
+}

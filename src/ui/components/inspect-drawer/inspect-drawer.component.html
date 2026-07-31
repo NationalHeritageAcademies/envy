@@ -1,0 +1,171 @@
+@if (containerId(); as id) {
+	<div class="scrim" (click)="ui.closeInspect()"></div>
+
+	<aside class="drawer">
+		<div class="resize" title="Drag to resize" (pointerdown)="startResize($event)"></div>
+
+		<header>
+			<span class="dot" [class.live]="running()"></span>
+			<span class="title">{{ title() }}</span>
+			<span class="caps" [class.run]="running()">{{ running() ? 'running' : 'stopped' }}</span>
+			<span class="spacer"></span>
+			<button class="x" [attr.aria-label]="isExpanded() ? 'Collapse' : 'Expand'" (click)="toggleExpand()">
+				<ev-icon [name]="isExpanded() ? 'arrows-in-simple' : 'arrows-out-simple'" />
+			</button>
+			<button class="x" aria-label="Close" (click)="ui.closeInspect()"><ev-icon name="x" /></button>
+		</header>
+
+		<div class="body">
+			<div>
+				<div class="seclabel">URLs</div>
+				@if (service(); as svc) {
+					@if (svc.routes.length === 0) {
+						<div class="cert">No published URL</div>
+					} @else {
+						<div class="urls">
+							@for (route of svc.routes; track route.host) {
+								<div class="urlc" [class.run]="running()">
+									<ev-icon class="lock" name="lock-simple" size="sm" />
+									<a class="url" [title]="routeUrl(route)" (click)="openRoute(route)">{{ route.host }}</a>
+									<button class="copy" aria-label="Copy" (click)="copyRoute(route)"><ev-icon name="copy" size="sm" /></button>
+								</div>
+							}
+						</div>
+					}
+				} @else {
+					<div class="cert">No published URL</div>
+				}
+				<div class="cert"><ev-icon name="lock-simple" size="sm" />{{ running() ? 'HTTPS · local CA trusted' : 'HTTPS ready when running' }}</div>
+			</div>
+
+			@if (service(); as svc) {
+				@if (domains().length) {
+					<div>
+						<div class="seclabel">Domains</div>
+						<div class="dchips">
+							@for (domain of domains(); track domain) {
+								<!-- prettier-ignore -->
+								<button class="dchip" [class.on]="activeDomains().has(domain)" [disabled]="svc.domainsLocked" (click)="toggleDomain(domain)">*.{{ domain }}</button>
+							}
+						</div>
+						@if (svc.domainsLocked) {
+							<div class="dnote">Set by the <code>envy.domains</code> label.</div>
+						} @else {
+							<div class="dnote">Tap to choose which domains this container is reachable on.</div>
+						}
+					</div>
+				}
+			}
+
+			<div>
+				<div class="tabs">
+					<button class="tab" [class.active]="drawerTab() === 'logs'" (click)="ui.setDrawerTab('logs')">
+						<ev-icon name="list-bullets" size="sm" />Logs
+					</button>
+					<button class="tab" [class.active]="drawerTab() === 'shell'" (click)="ui.setDrawerTab('shell')">
+						<ev-icon name="terminal-window" size="sm" />Shell
+					</button>
+					<span class="tabspacer"></span>
+					@if (drawerTab() === 'logs') {
+						<button class="clearbtn" title="Clear the log view (doesn't affect Docker)" (click)="clearLogs()">
+							<ev-icon name="eraser" size="sm" />Clear
+						</button>
+					}
+				</div>
+
+				@if (drawerTab() === 'logs') {
+					<div class="logs">
+						@for (line of logs(); track $index) {
+							<div [class]="logClass(line)">{{ line.text }}</div>
+						}
+					</div>
+				} @else if (running()) {
+					@for (key of shellKey(); track key) {
+						<envy-shell-term [containerId]="key" />
+					}
+				} @else {
+					<div class="stopnote">Container is not running — Start it to open a shell.</div>
+				}
+			</div>
+
+			@if (detail(); as d) {
+				@if (d.env.length) {
+					<div>
+						<div class="seclabel">Environment</div>
+						<table>
+							<tbody>
+								@for (entry of d.env.slice(0, maxEnvRows); track entry.key) {
+									<tr>
+										<td class="k">{{ entry.key }}</td>
+										<td class="v">{{ entry.value }}</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+
+				@if (d.mounts.length) {
+					<div>
+						<div class="seclabel">Mounts</div>
+						<table>
+							<tbody>
+								@for (mount of d.mounts; track mount.destination) {
+									<tr>
+										<td class="v">{{ mount.source }} → {{ mount.destination }}</td>
+										<td class="k romode">{{ mount.mode }}</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+
+				<div>
+					<div class="seclabel">Details</div>
+					<table>
+						<tbody>
+							<tr>
+								<td class="k">image</td>
+								<td class="v">{{ d.image }}</td>
+							</tr>
+							<tr>
+								<td class="k">id</td>
+								<td class="v">{{ d.id }}</td>
+							</tr>
+							<tr>
+								<td class="k">ports</td>
+								<td class="v">{{ portSummary(d) }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			} @else {
+				<div class="loading"><ev-spinner /></div>
+			}
+		</div>
+
+		<footer>
+			@if (running()) {
+				<button ev-button variant="ghost" size="sm" (click)="facade.stopService(id)"><ev-icon name="stop" />Stop</button>
+				<button ev-button variant="ghost" size="sm" class="icon-only" aria-label="Restart" (click)="facade.restartService(id)">
+					<ev-icon name="arrow-clockwise" />
+				</button>
+			} @else {
+				<button ev-button variant="primary" size="sm" (click)="facade.startService(id)"><ev-icon name="play" />Start</button>
+			}
+			<button ev-button variant="ghost" size="sm" title="Pull the latest image + recreate this container" (click)="facade.recreateContainer(id)">
+				<ev-icon name="download-simple" />Update
+			</button>
+			<span class="spacer"></span>
+			@if (inspectConfirm()) {
+				<button ev-button variant="ghost" size="sm" (click)="ui.setInspectConfirm(false)">Cancel</button>
+				<button ev-button variant="danger" size="sm" (click)="facade.confirmRemove(id)">Remove</button>
+			} @else {
+				<button ev-button variant="ghost" size="sm" class="icon-only" aria-label="Remove" (click)="ui.setInspectConfirm(true)">
+					<ev-icon name="trash" />
+				</button>
+			}
+		</footer>
+	</aside>
+}

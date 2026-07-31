@@ -1,0 +1,161 @@
+:host {
+	display: block;
+}
+
+.wrap {
+	padding: 22px 28px 40px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.tiles {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 14px;
+}
+
+.tile {
+	background: var(--ev-surface);
+	border: 1px solid var(--ev-border);
+	border-radius: 13px;
+	padding: 14px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.tile .lbl {
+	font-family: var(--ev-font-mono);
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--ev-faint);
+}
+
+.tile .val {
+	font-family: var(--ev-font-mono);
+	font-size: 22px;
+	font-weight: 600;
+	color: var(--ev-text);
+}
+
+.tile svg {
+	overflow: visible;
+}
+
+.table {
+	background: var(--ev-bg-2);
+	border: 1px solid var(--ev-border);
+	border-radius: 14px;
+	overflow: hidden;
+}
+
+.thead,
+.grow,
+.row {
+	display: grid;
+	grid-template-columns: 1fr 110px 110px 110px 110px;
+	align-items: center;
+	padding: 11px 16px;
+	border-bottom: 1px solid var(--ev-border);
+}
+
+.thead {
+	padding: 12px 16px;
+	font-family: var(--ev-font-mono);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	color: var(--ev-faint);
+}
+
+.row:last-child,
+.grow:last-child {
+	border-bottom: none;
+}
+
+.grow {
+	cursor: pointer;
+}
+
+.grow .name {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-weight: 600;
+}
+
+.grow .gchip {
+	width: 30px;
+	height: 30px;
+	border-radius: 8px;
+	background: var(--ev-accent-dim);
+	color: var(--ev-accent);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.gcount {
+	font-family: var(--ev-font-mono);
+	font-size: 11px;
+	color: var(--ev-faint);
+	margin-left: 4px;
+}
+
+.caret ev-icon {
+	transition: transform 0.2s ease;
+}
+
+.caret.collapsed ev-icon {
+	transform: rotate(-90deg);
+}
+
+.row .name {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding-left: 28px;
+	color: var(--ev-dim);
+}
+
+.row.run .name {
+	color: var(--ev-text);
+}
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--ev-faint);
+	flex: none;
+}
+
+.row.run .dot {
+	background: var(--ev-accent);
+}
+
+.num {
+	text-align: right;
+	font-family: var(--ev-font-mono);
+	font-size: 12.5px;
+	color: var(--ev-dim);
+}
+
+.cpu {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+.cpu svg {
+	overflow: visible;
+}
+
+.row.run .cpu .v,
+.grow .cpu .v {
+	color: var(--ev-accent);
+}

@@ -1,0 +1,191 @@
+@if (loading()) {
+	<div class="wrap">
+		@for (group of skeletonGroups; track group) {
+			<div class="group">
+				<div class="ghead">
+					<div class="sk sk-chip"></div>
+					<div class="sk sk-title"></div>
+				</div>
+				<div class="gbody">
+					@for (card of skeletonCards; track card) {
+						<div class="sk sk-card"></div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+} @else if (services().length === 0) {
+	<div class="wrap">
+		@if (dockerOffline() && dockerMissing()) {
+			<div class="empty">
+				<ev-icon name="plugs" size="xl" class="empty-icon" />
+				<h2>Docker isn’t installed</h2>
+				<p>
+					Envy needs a Docker engine to manage your containers. Install <strong>Docker Desktop</strong> — Envy connects automatically once it's
+					running.
+				</p>
+				<button ev-button variant="primary" (click)="facade.openUrl(installUrl())"><ev-icon name="download-simple" />Install Docker Desktop</button>
+			</div>
+		} @else if (dockerOffline()) {
+			<div class="empty">
+				<ev-icon name="plugs" size="xl" class="empty-icon" />
+				<h2>Docker isn’t running</h2>
+				<!-- Two whole sentences rather than an inline @if inside the prose:
+				     the formatter reflows a mid-sentence block, and the collapsed
+				     whitespace leaves a stray gap before the period. -->
+				@if (provider(); as p) {
+					<p>
+						Envy talks to your Docker daemon (detected <strong>{{ p.name }}</strong
+						>). It'll connect automatically once it's up.
+					</p>
+				} @else {
+					<p>Envy talks to your Docker daemon. It'll connect automatically once it's up.</p>
+				}
+				@if (provider(); as p) {
+					@if (p.startable) {
+						<button ev-button variant="primary" [disabled]="startingDocker()" (click)="facade.startDocker()">
+							@if (startingDocker()) {
+								<ev-spinner size="sm" />
+								<span>Starting {{ p.name }}…</span>
+							} @else {
+								<ev-icon name="play" />
+								<span>Start {{ p.name }}</span>
+							}
+						</button>
+					}
+				}
+			</div>
+		} @else {
+			<div class="empty">
+				<ev-icon name="cube" size="xl" class="empty-icon" />
+				<h2>No containers yet</h2>
+				<p>Run an image and it shows up here with its own URL.</p>
+				<button ev-button variant="primary" (click)="ui.openRun()"><ev-icon name="plus" />Run a container</button>
+			</div>
+		}
+	</div>
+} @else {
+	<div class="wrap">
+		<div class="topbar">
+			<button ev-button variant="primary" size="sm" (click)="ui.openRun()"><ev-icon name="plus" />Run a container</button>
+		</div>
+
+		@for (group of groups(); track group.project) {
+			<div class="group">
+				<div class="ghead">
+					<button class="caret" [class.collapsed]="isCollapsed(group.project)" aria-label="Collapse" (click)="ui.toggleGroup(group.project)">
+						<ev-icon name="caret-down" />
+					</button>
+					<span class="gchip"><ev-icon [name]="group.standalone ? 'squares-four' : 'stack'" /></span>
+					<div>
+						<div class="gname">{{ group.project }}</div>
+						@if (!group.standalone) {
+							<div class="gkind">Compose project</div>
+						}
+					</div>
+					<span class="count" [class.on]="runningCount(group) > 0">
+						<span class="d"></span>{{ runningCount(group) }}/{{ group.services.length }}
+					</span>
+					<span class="gspacer"></span>
+					@if (!group.standalone) {
+						<button ev-button [variant]="runningCount(group) > 0 ? 'ghost' : 'outline'" size="sm" (click)="toggleGroup(group)">
+							{{ runningCount(group) > 0 ? 'Stop all' : 'Start all' }}
+						</button>
+					}
+				</div>
+
+				@if (!isCollapsed(group.project)) {
+					<div class="gbody">
+						@for (service of group.services; track service.id) {
+							<div class="card" [class.stopped]="!service.running">
+								<div class="ctop">
+									<span class="dot" [class.live]="service.running"></span>
+									<span class="cname" [title]="service.name">{{ cardTitle(service, !group.standalone) }}</span>
+									<span class="caps" [class.run]="service.running">{{ service.running ? 'running' : 'stopped' }}</span>
+								</div>
+
+								@if (service.routes.length === 0) {
+									@if (!service.running) {
+										<div class="nourl">No published URL</div>
+									} @else if (needsPublishedPort(service)) {
+										<div class="nourl hint">Publish a port (<code>-p</code>) to get a URL — Docker Desktop can't reach container IPs.</div>
+									} @else {
+										<div class="nourl">Internal only · no published port</div>
+									}
+								} @else {
+									<div class="urls">
+										@for (route of service.routes; track route.host) {
+											<div class="urlc" [class.run]="service.running">
+												<ev-icon class="lock" name="lock-simple" size="sm" />
+												<a class="url" [title]="routeUrl(route)" (click)="openRoute(service, route)">{{ route.host }}</a>
+												<span class="utag" [class.custom]="urlTag(route.host) === 'custom'">{{ urlTag(route.host) }}</span>
+												<button class="copy" aria-label="Copy URL" (click)="copyRoute(route)"><ev-icon name="copy" size="sm" /></button>
+											</div>
+										}
+									</div>
+								}
+
+								<div class="meta">
+									<span class="img" [title]="service.image">{{ metaLine(service) }}</span>
+									<button class="scope" title="Domains — click to change" (click)="ui.openInspect(service.id)">
+										<ev-icon name="globe-simple" size="sm" />
+										<span>{{ domainSummary(service) }}</span>
+										@if (service.domainsLocked) {
+											<ev-icon class="lk" name="lock-simple" size="xs" />
+										}
+									</button>
+								</div>
+
+								<div class="abar">
+									@if (busy()[service.id]; as kind) {
+										<span class="busy"><ev-spinner size="sm" />{{ busyLabel[kind] }}</span>
+									} @else if (removeConfirm()[service.id]) {
+										<div class="confirm">
+											<span class="q">Remove this container?</span>
+											<button ev-button variant="ghost" size="sm" (click)="facade.cancelRemove(service.id)">Cancel</button>
+											<button ev-button variant="danger" size="sm" (click)="facade.confirmRemove(service.id)">Remove</button>
+										</div>
+									} @else {
+										@if (service.running) {
+											<button ev-button variant="ghost" size="sm" (click)="facade.stopService(service.id)">
+												<ev-icon name="stop" />Stop
+											</button>
+											<button
+												ev-button
+												variant="ghost"
+												size="sm"
+												class="icon-only"
+												aria-label="Restart"
+												(click)="facade.restartService(service.id)"
+											>
+												<ev-icon name="arrow-clockwise" />
+											</button>
+										} @else {
+											<button ev-button variant="primary" size="sm" (click)="facade.startService(service.id)">
+												<ev-icon name="play" />Start
+											</button>
+										}
+										<span class="aspacer"></span>
+										<button ev-button variant="ghost" size="sm" class="icon-only" aria-label="Inspect" (click)="ui.openInspect(service.id)">
+											<ev-icon name="terminal-window" />
+										</button>
+										<button
+											ev-button
+											variant="ghost"
+											size="sm"
+											class="icon-only"
+											aria-label="Remove"
+											(click)="facade.armRemove(service.id)"
+										>
+											<ev-icon name="trash" />
+										</button>
+									}
+								</div>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		}
+	</div>
+}

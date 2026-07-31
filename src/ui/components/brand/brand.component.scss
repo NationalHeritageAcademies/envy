@@ -1,0 +1,9 @@
+:host {
+	display: inline-flex;
+	line-height: 0;
+}
+
+svg {
+	display: block;
+	filter: drop-shadow(0 0 7px rgba(52, 211, 153, 0.45));
+}

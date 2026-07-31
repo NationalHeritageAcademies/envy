@@ -1,0 +1,37 @@
+:host {
+	display: block;
+	height: 280px;
+	border-radius: 9px;
+	border: 1px solid var(--ev-border);
+	background: #0e1211; /* matches the xterm theme bg so rows blend seamlessly */
+	overflow: hidden;
+	padding: 10px 12px;
+	box-sizing: border-box;
+}
+
+/* xterm builds these nodes itself, after the view is created, so they never
+   get the encapsulation attribute — ::ng-deep is what lets these rules reach
+   them. Everything here stays under :host so nothing leaks to the rest of the
+   app. */
+:host ::ng-deep .xterm {
+	height: 100%;
+}
+
+:host ::ng-deep .xterm-viewport {
+	background-color: transparent !important;
+}
+
+:host ::ng-deep .xterm-viewport::-webkit-scrollbar {
+	width: 10px;
+}
+
+:host ::ng-deep .xterm-viewport::-webkit-scrollbar-thumb {
+	background: var(--ev-border-2);
+	border-radius: 8px;
+	border: 3px solid transparent;
+	background-clip: content-box;
+}
+
+:host ::ng-deep .xterm-viewport::-webkit-scrollbar-track {
+	background: transparent;
+}

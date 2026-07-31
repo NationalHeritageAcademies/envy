@@ -1,0 +1,46 @@
+<div class="wrap">
+	<section class="group">
+		<h2>General</h2>
+		<div class="card">
+			<div class="row">
+				<div class="rtext">
+					<span class="title">Keep running in background</span>
+					<span class="hint">Closing the window leaves Envy in the menu bar so your URLs stay served.</span>
+				</div>
+				<ev-toggle
+					[checked]="settings().keepRunningInBackground"
+					ariaLabel="Keep running in background"
+					(checkedChange)="facade.setAppSetting('keepRunningInBackground', $event)"
+				/>
+			</div>
+			<div class="row">
+				<div class="rtext">
+					<span class="title">Start at login</span>
+					<span class="hint">Launch Envy automatically when you log in.</span>
+				</div>
+				<ev-toggle [checked]="settings().startAtLogin" ariaLabel="Start at login" (checkedChange)="facade.setAppSetting('startAtLogin', $event)" />
+			</div>
+		</div>
+	</section>
+
+	<section class="group">
+		<h2>Updates</h2>
+		<div class="card">
+			<div class="row">
+				<div class="rtext">
+					<span class="title">Envy {{ version() ? 'v' + version() : '' }}</span>
+					<span class="hint">{{ updateCheckMsg() || 'Envy updates automatically in the background.' }}</span>
+				</div>
+				<button ev-button variant="secondary" [disabled]="updateChecking()" (click)="facade.checkForUpdates()">
+					@if (updateChecking()) {
+						<ev-spinner size="sm" />
+						<span>Checking…</span>
+					} @else {
+						<ev-icon name="arrow-clockwise" />
+						<span>Check for Updates</span>
+					}
+				</button>
+			</div>
+		</div>
+	</section>
+</div>

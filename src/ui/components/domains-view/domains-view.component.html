@@ -1,0 +1,39 @@
+<div class="wrap">
+	<p class="lead">
+		Envy serves zero-config HTTPS for each suffix below. The <strong>primary</strong> one is the default: every container gets a
+		<code>&lt;name&gt;.{{ primary() }}</code> URL unless you assign it more domains (per-container, in its Inspect drawer).
+	</p>
+
+	<div class="addbar">
+		<div class="inputwrap">
+			<span class="star">*.</span>
+			<input
+				class="ev-input add"
+				placeholder="add a suffix  ·  e.g. acme.test"
+				[value]="draft()"
+				(input)="onDraftInput($event)"
+				(keydown.enter)="add()"
+			/>
+		</div>
+		<button ev-button variant="primary" [disabled]="!draft().trim()" (click)="add()"><ev-icon name="plus" />Add</button>
+	</div>
+
+	<div class="list">
+		@for (domain of domains(); track domain; let first = $first) {
+			<div class="row">
+				<span class="chip"><ev-icon name="globe-simple" /></span>
+				<span class="domain"><span class="star">*.</span>{{ domain }}</span>
+				@if (first) {
+					<span class="primary">primary</span>
+				} @else {
+					<span class="rowactions">
+						<button ev-button variant="ghost" size="sm" (click)="facade.setPrimaryDomain(domain)"><ev-icon name="star" />Make primary</button>
+						<button ev-button variant="ghost" size="sm" class="icon-only" aria-label="Remove domain" (click)="facade.removeDomain(domain)">
+							<ev-icon name="trash" />
+						</button>
+					</span>
+				}
+			</div>
+		}
+	</div>
+</div>

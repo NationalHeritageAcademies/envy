@@ -1,0 +1,70 @@
+<div class="wrap">
+	<div class="tiles">
+		@for (tile of tiles(); track tile.label) {
+			<div class="tile">
+				<span class="lbl">{{ tile.label }}</span>
+				<span class="val">{{ tile.value }}</span>
+				<svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+					<polyline
+						[attr.points]="tile.points"
+						fill="none"
+						[attr.stroke]="tile.color"
+						stroke-width="1.6"
+						stroke-linejoin="round"
+						stroke-linecap="round"
+					/>
+				</svg>
+			</div>
+		}
+	</div>
+
+	<div class="table">
+		<div class="thead">
+			<span class="name">NAME</span>
+			<span class="num">CPU</span>
+			<span class="num">MEMORY</span>
+			<span class="num">NETWORK</span>
+			<span class="num">DISK</span>
+		</div>
+
+		@for (group of groups(); track group.project) {
+			<div class="grow" (click)="toggle(group.project)">
+				<span class="name">
+					<span class="caret" [class.collapsed]="isCollapsed(group.project)"><ev-icon name="caret-down" /></span>
+					<span class="gchip"><ev-icon name="stack" /></span>{{ group.project }}
+					<span class="gcount">{{ group.running }}/{{ group.total }}</span>
+				</span>
+				<span class="num cpu"
+					><span class="v">{{ group.cpu }}</span></span
+				>
+				<span class="num">{{ group.mem }}</span>
+				<span class="num">{{ group.net }}</span>
+				<span class="num">{{ group.disk }}</span>
+			</div>
+
+			@if (!isCollapsed(group.project)) {
+				@for (row of group.rows; track row.id) {
+					<div class="row" [class.run]="row.running">
+						<span class="name"><span class="dot"></span>{{ row.name }}</span>
+						<span class="num cpu">
+							<svg width="34" height="14" viewBox="0 0 34 14" preserveAspectRatio="none" aria-hidden="true">
+								<polyline
+									[attr.points]="row.points"
+									fill="none"
+									stroke="var(--ev-accent)"
+									stroke-width="1.3"
+									opacity="0.85"
+									stroke-linejoin="round"
+								/>
+							</svg>
+							<span class="v">{{ row.cpu }}</span>
+						</span>
+						<span class="num">{{ row.mem }}</span>
+						<span class="num">{{ row.net }}</span>
+						<span class="num">{{ row.disk }}</span>
+					</div>
+				}
+			}
+		}
+	</div>
+</div>

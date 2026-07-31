@@ -1,0 +1,66 @@
+<div class="wrap">
+	<div class="pullbar">
+		<input class="ev-input" placeholder="Pull an image  ·  e.g. postgres:16" [value]="draft()" (input)="onDraftInput($event)" (keydown.enter)="pull()" />
+		<button ev-button variant="primary" [disabled]="!draft().trim()" (click)="pull()"><ev-icon name="download-simple" />Pull</button>
+	</div>
+
+	<input class="ev-input filter" placeholder="Filter local images" [value]="filter()" (input)="onFilterInput($event)" />
+
+	@if (loading()) {
+		<div class="empty"><ev-spinner /></div>
+	} @else if (rows().length === 0) {
+		<div class="empty">
+			@if (filter().trim()) {
+				<span>No images match “{{ filter() }}”.</span>
+			} @else {
+				<span>No local images yet — pull one above to get started.</span>
+			}
+		</div>
+	} @else {
+		<div class="list">
+			@for (row of rows(); track row.image.id) {
+				<div class="row">
+					<span class="chip"><ev-icon name="cube" /></span>
+					<div class="namecol">
+						<div class="tag">
+							<span>{{ row.name }}</span>
+							@if (row.version) {
+								<span class="ver">:{{ row.version }}</span>
+							}
+						</div>
+						<div class="age">{{ row.age }}</div>
+					</div>
+					<span class="use" [class.in]="row.inUse">{{ row.inUse ? 'in use' : 'unused' }}</span>
+					<span class="size">{{ row.size }}</span>
+					@if (row.runnable) {
+						<button
+							ev-button
+							variant="ghost"
+							size="sm"
+							class="icon-only"
+							aria-label="Update (re-pull latest)"
+							title="Update — re-pull this tag"
+							(click)="facade.updateImage(row.tag)"
+						>
+							<ev-icon name="arrow-clockwise" />
+						</button>
+						<button
+							ev-button
+							variant="ghost"
+							size="sm"
+							class="icon-only"
+							aria-label="Run from this image"
+							title="Run a container"
+							(click)="ui.openRun(row.tag)"
+						>
+							<ev-icon name="play" />
+						</button>
+					}
+					<button ev-button variant="ghost" size="sm" class="icon-only" aria-label="Remove image" (click)="facade.removeImage(row.image.id)">
+						<ev-icon name="trash" />
+					</button>
+				</div>
+			}
+		</div>
+	}
+</div>
