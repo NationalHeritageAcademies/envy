@@ -4,11 +4,25 @@ import { DockerStateService } from '../../store/docker-state.service';
 import { EnvyFacade } from '../../store/envy.facade';
 import { SERVICE_LABEL } from '../../store/model';
 import { DRAWER_DEFAULT_WIDTH, DRAWER_MIN_WIDTH, UiStateService } from '../../store/ui-state.service';
+import { parseAnsi, type AnsiLine } from '../../util/ansi';
 import { ShellTermComponent } from '../shell-term/shell-term.component';
 import { ButtonComponent, IconComponent, SpinnerComponent } from '../ui';
 
 /** Cap on retained log lines, so a chatty container can't grow the DOM forever. */
 const MAX_LOGS = 500;
+
+/**
+ * A log line ready to render: parsed once on arrival rather than on every
+ * change detection, since lines arrive several times a second and the pane
+ * holds up to MAX_LOGS of them.
+ */
+interface LogRow {
+	/** Monotonic id — stable for @for tracking as the buffer trims from the front. */
+	key: number;
+	/** Fallback colour class, used for the parts the line doesn't colour itself. */
+	cls: string;
+	line: AnsiLine;
+}
 
 /** Space left for the sidebar when the drawer is expanded to "full" width. */
 const SIDEBAR_CLEARANCE = 256;
@@ -41,7 +55,7 @@ export class InspectDrawerComponent implements OnInit {
 	protected readonly facade = inject(EnvyFacade);
 
 	protected readonly detail = signal<ContainerDetail | null>(null);
-	protected readonly logs = signal<LogLine[]>([]);
+	protected readonly logs = signal<LogRow[]>([]);
 	protected readonly drawerTab = this.ui.drawerTab;
 	protected readonly inspectConfirm = this.ui.inspectConfirm;
 	protected readonly domains = this.docker.domains;
@@ -77,6 +91,7 @@ export class InspectDrawerComponent implements OnInit {
 
 	private logUnsub: (() => void) | null = null;
 	private lastRunning: boolean | null = null;
+	private logKey = 0;
 
 	constructor() {
 		// The width lives in a CSS custom property on the host, never a template
@@ -136,20 +151,34 @@ export class InspectDrawerComponent implements OnInit {
 	private subscribeLogStream(id: string): void {
 		this.logUnsub?.();
 		this.logUnsub = window.envy.subscribeLogs(id, (line) => {
+			const row = this.toRow(line);
 			this.logs.update((current) => {
-				const next = [...current, line];
+				const next = [...current, row];
 				return next.length > MAX_LOGS ? next.slice(next.length - MAX_LOGS) : next;
 			});
 		});
+	}
+
+	private toRow(line: LogLine): LogRow {
+		const parsed = parseAnsi(line.text);
+		return { key: this.logKey++, cls: this.logClass(line, parsed), line: parsed };
 	}
 
 	protected clearLogs(): void {
 		this.logs.set([]);
 	}
 
-	/** stderr and anything that looks like an error/warning gets colour-coded. */
-	protected logClass(line: LogLine): string {
-		const text = line.text.toLowerCase();
+	/**
+	 * Colour for the parts of a line that don't colour themselves.
+	 *
+	 * When the line carries its own ANSI styling the tool has already said how
+	 * it should look, so the stderr/keyword heuristic stands down rather than
+	 * fighting it — plenty of CLIs (ng, vite, npm) write ordinary progress
+	 * output to stderr, and painting all of that red buries the real errors.
+	 */
+	private logClass(line: LogLine, parsed: AnsiLine): string {
+		if (parsed.styled) return 'lg';
+		const text = parsed.text.toLowerCase();
 		if (line.stream === 'stderr' || text.includes('error')) return 'lg err';
 		if (text.includes('warn')) return 'lg warn';
 		return 'lg info';

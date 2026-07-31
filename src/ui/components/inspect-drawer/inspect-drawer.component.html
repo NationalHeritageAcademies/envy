@@ -75,8 +75,13 @@
 
 				@if (drawerTab() === 'logs') {
 					<div class="logs">
-						@for (line of logs(); track $index) {
-							<div [class]="logClass(line)">{{ line.text }}</div>
+						@for (row of logs(); track row.key) {
+							<div [class]="row.cls">
+								@for (seg of row.line.segments; track $index) {
+									<!-- prettier-ignore -->
+									<span [style.color]="seg.color" [style.background-color]="seg.background" [class.bold]="seg.bold" [class.dim]="seg.dim" [class.italic]="seg.italic" [class.underline]="seg.underline">{{ seg.text }}</span>
+								}
+							</div>
 						}
 					</div>
 				} @else if (running()) {

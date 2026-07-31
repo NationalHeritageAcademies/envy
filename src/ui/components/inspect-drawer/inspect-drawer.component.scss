@@ -311,6 +311,25 @@ header {
 	color: var(--ev-dim);
 }
 
+/* Attributes carried by a line's own ANSI codes. A line that colours itself
+   gets no .info/.err/.warn class, so its uncoloured spans inherit --ev-text —
+   the equivalent of a terminal's default foreground. */
+.lg .bold {
+	font-weight: 600;
+}
+
+.lg .dim {
+	opacity: 0.65;
+}
+
+.lg .italic {
+	font-style: italic;
+}
+
+.lg .underline {
+	text-decoration: underline;
+}
+
 .lg.warn {
 	color: var(--ev-warn);
 }

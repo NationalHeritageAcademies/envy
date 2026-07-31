@@ -39,6 +39,26 @@
 	--ev-danger-dim: rgba(248, 113, 113, 0.13);
 	--ev-warn: #e3b341;
 	--ev-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.5);
+
+	/* ANSI palette for coloured container logs (see util/ansi.ts). Tuned to
+	   read on the log pane's --ev-bg-2, so "black" is lifted off the
+	   background and "white" stops short of pure white. */
+	--ev-ansi-black: #4a5551;
+	--ev-ansi-red: #f87171;
+	--ev-ansi-green: #34d399;
+	--ev-ansi-yellow: #e3b341;
+	--ev-ansi-blue: #5aa9ff;
+	--ev-ansi-magenta: #c084fc;
+	--ev-ansi-cyan: #4dd4e0;
+	--ev-ansi-white: #d5dcd8;
+	--ev-ansi-bright-black: #6b7772;
+	--ev-ansi-bright-red: #fca5a5;
+	--ev-ansi-bright-green: #6ee7b7;
+	--ev-ansi-bright-yellow: #f5cd6b;
+	--ev-ansi-bright-blue: #8cc3ff;
+	--ev-ansi-bright-magenta: #d8b4fe;
+	--ev-ansi-bright-cyan: #7fe3ec;
+	--ev-ansi-bright-white: #f2f6f4;
 }
 
 :root[data-theme='light'] {
@@ -63,6 +83,26 @@
 	--ev-danger-dim: rgba(220, 38, 38, 0.1);
 	--ev-warn: #a16207;
 	--ev-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.18);
+
+	/* Same palette darkened for the light theme's log pane — a terminal's
+	   default colours are chosen for a dark background and several of them
+	   (yellow, cyan, bright-*) are unreadable on a light one. */
+	--ev-ansi-black: #2b3531;
+	--ev-ansi-red: #b91c1c;
+	--ev-ansi-green: #0b7d57;
+	--ev-ansi-yellow: #a16207;
+	--ev-ansi-blue: #1d4ed8;
+	--ev-ansi-magenta: #7e22ce;
+	--ev-ansi-cyan: #0e7490;
+	--ev-ansi-white: #6b7772;
+	--ev-ansi-bright-black: #55605c;
+	--ev-ansi-bright-red: #dc2626;
+	--ev-ansi-bright-green: #059669;
+	--ev-ansi-bright-yellow: #b45309;
+	--ev-ansi-bright-blue: #2563eb;
+	--ev-ansi-bright-magenta: #9333ea;
+	--ev-ansi-bright-cyan: #0891b2;
+	--ev-ansi-bright-white: #94a29c;
 }
 
 /* ---- Typography + geometry (theme-independent) ---------------------------- */
