@@ -1,13 +1,16 @@
 /* =============================================================================
    Envy Design Tokens — "green with envy"
    -----------------------------------------------------------------------------
-   The design palette is the single source of truth as `--ev-*` (dark + light),
-   and we MAP it onto Melodic's `--ml-*` semantic tokens. That way every
-   @melodicdev/components element (button, card, input, drawer, tabs, table,
-   toast…) renders as the green design automatically — no per-component
-   restyling. This is the themeability story end-to-end.
+   The design palette is the single source of truth as `--ev-*` (dark + light).
+   Every component consumes these directly: the renderer has no component
+   library underneath it any more, so there is no second token vocabulary to map
+   onto.
 
    Set data-theme="dark" (default) or "light" on the root; everything cascades.
+   Angular's default (emulated) view encapsulation is attribute-based rather
+   than Shadow DOM, so the global rules at the bottom of this file — base
+   element styles, native-control classes, keyframes — reach component
+   templates directly.
    ============================================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@400;500;600;700&display=swap');
@@ -15,129 +18,181 @@
 /* ---- Design palette (source of truth) ------------------------------------- */
 :root[data-theme='dark'],
 :root:not([data-theme='light']) {
-  --ev-bg: #0a0c0b;
-  --ev-bg-2: #0e1211;
-  --ev-side: #0c100e;
-  --ev-surface: #141a17;
-  --ev-surface-2: #1a211d;
-  --ev-border: rgba(255, 255, 255, 0.07);
-  --ev-border-2: rgba(255, 255, 255, 0.13);
-  --ev-text: #e9ede9;
-  --ev-dim: #98a39d;
-  --ev-faint: #5d6863;
-  --ev-accent: #34d399;
-  --ev-accent-2: #10b981;
-  --ev-accent-deep: #0b7a54;
-  --ev-accent-dim: rgba(52, 211, 153, 0.14);
-  --ev-glow: rgba(52, 211, 153, 0.5);
-  --ev-danger: #f87171;
-  --ev-danger-dim: rgba(248, 113, 113, 0.13);
+	--ev-bg: #0a0c0b;
+	--ev-bg-2: #0e1211;
+	--ev-side: #0c100e;
+	--ev-surface: #141a17;
+	--ev-surface-2: #1a211d;
+	--ev-border: rgba(255, 255, 255, 0.07);
+	--ev-border-2: rgba(255, 255, 255, 0.13);
+	--ev-text: #e9ede9;
+	--ev-dim: #98a39d;
+	--ev-faint: #5d6863;
+	--ev-accent: #34d399;
+	--ev-accent-2: #10b981;
+	--ev-accent-deep: #0b7a54;
+	--ev-accent-dim: rgba(52, 211, 153, 0.14);
+	--ev-accent-edge: rgba(52, 211, 153, 0.3);
+	--ev-accent-on: #04130c;
+	--ev-glow: rgba(52, 211, 153, 0.5);
+	--ev-danger: #f87171;
+	--ev-danger-dim: rgba(248, 113, 113, 0.13);
+	--ev-warn: #e3b341;
+	--ev-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.5);
 }
 
 :root[data-theme='light'] {
-  --ev-bg: #eef1ef;
-  --ev-bg-2: #e7ebe9;
-  --ev-side: #e9edea;
-  --ev-surface: #ffffff;
-  --ev-surface-2: #f3f6f4;
-  --ev-border: rgba(0, 0, 0, 0.08);
-  --ev-border-2: rgba(0, 0, 0, 0.15);
-  --ev-text: #15201a;
-  --ev-dim: #586660;
-  --ev-faint: #93a39c;
-  --ev-accent: #0f9b6c;
-  --ev-accent-2: #0b7d57;
-  --ev-accent-deep: #095c40;
-  --ev-accent-dim: rgba(15, 155, 108, 0.12);
-  --ev-glow: rgba(15, 155, 108, 0.4);
-  --ev-danger: #dc2626;
-  --ev-danger-dim: rgba(220, 38, 38, 0.1);
+	--ev-bg: #eef1ef;
+	--ev-bg-2: #e7ebe9;
+	--ev-side: #e9edea;
+	--ev-surface: #ffffff;
+	--ev-surface-2: #f3f6f4;
+	--ev-border: rgba(0, 0, 0, 0.08);
+	--ev-border-2: rgba(0, 0, 0, 0.15);
+	--ev-text: #15201a;
+	--ev-dim: #586660;
+	--ev-faint: #93a39c;
+	--ev-accent: #0f9b6c;
+	--ev-accent-2: #0b7d57;
+	--ev-accent-deep: #095c40;
+	--ev-accent-dim: rgba(15, 155, 108, 0.12);
+	--ev-accent-edge: rgba(15, 155, 108, 0.32);
+	--ev-accent-on: #ffffff;
+	--ev-glow: rgba(15, 155, 108, 0.4);
+	--ev-danger: #dc2626;
+	--ev-danger-dim: rgba(220, 38, 38, 0.1);
+	--ev-warn: #a16207;
+	--ev-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
-/* ---- Map the palette onto Melodic semantic tokens ------------------------- */
-/* High specificity (:root[data-theme]) so these win over the library defaults. */
-:root[data-theme='dark'],
-:root[data-theme='light'],
-:root:not([data-theme='light']) {
-  --ml-font-sans: 'Fira Sans', -apple-system, system-ui, sans-serif;
-  --ml-font-mono: 'Fira Code', ui-monospace, 'SF Mono', monospace;
+/* ---- Typography + geometry (theme-independent) ---------------------------- */
+:root {
+	--ev-font-sans: 'Fira Sans', -apple-system, system-ui, sans-serif;
+	--ev-font-mono: 'Fira Code', ui-monospace, 'SF Mono', monospace;
 
-  --ml-color-background: var(--ev-bg);
-  --ml-color-surface: var(--ev-surface);
-  --ml-color-surface-raised: var(--ev-surface-2);
-  --ml-color-surface-overlay: var(--ev-surface);
-  --ml-color-surface-sunken: var(--ev-bg-2);
-  --ml-color-input-bg: var(--ev-surface);
-
-  --ml-color-border: var(--ev-border);
-  --ml-color-border-muted: var(--ev-border);
-  --ml-color-border-strong: var(--ev-border-2);
-  --ml-color-border-focus: var(--ev-accent);
-  --ml-color-focus-ring: var(--ev-accent);
-  --ml-shadow-ring-color: var(--ev-glow);
-
-  --ml-color-text: var(--ev-text);
-  --ml-color-text-secondary: var(--ev-dim);
-  --ml-color-text-muted: var(--ev-faint);
-  --ml-color-text-subtle: var(--ev-faint);
-  --ml-color-text-link: var(--ev-accent);
-  --ml-color-text-link-hover: var(--ev-accent-2);
-
-  --ml-color-primary: var(--ev-accent);
-  --ml-color-primary-hover: var(--ev-accent-2);
-  --ml-color-primary-active: var(--ev-accent-deep);
-  --ml-color-primary-subtle: var(--ev-accent-dim);
-
-  --ml-color-success: var(--ev-accent);
-  --ml-color-success-subtle: var(--ev-accent-dim);
-  --ml-color-info: var(--ev-accent);
-  --ml-color-info-subtle: var(--ev-accent-dim);
-  --ml-color-danger: var(--ev-danger);
-  --ml-color-danger-hover: var(--ev-danger);
-  --ml-color-danger-subtle: var(--ev-danger-dim);
-
-  /* Radii per the spec: buttons/inputs 8, chips 7, cards 13, groups 14, full. */
-  --ml-radius-xs: 5px;
-  --ml-radius-sm: 7px;
-  --ml-radius-md: 8px;
-  --ml-radius: 8px;
-  --ml-radius-lg: 13px;
-  --ml-radius-xl: 14px;
-  --ml-radius-2xl: 16px;
-  --ml-radius-full: 999px;
+	/* Radii per the design spec: buttons/inputs 8, chips 7, cards 13, groups 14. */
+	--ev-radius-xs: 5px;
+	--ev-radius-sm: 7px;
+	--ev-radius-md: 8px;
+	--ev-radius-lg: 13px;
+	--ev-radius-xl: 14px;
+	--ev-radius-full: 999px;
 }
 
 /* ---- Keyframes (from the design spec) ------------------------------------- */
 @keyframes ev-pulse {
-  0% { box-shadow: 0 0 0 0 var(--ev-glow); }
-  70% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+	0% {
+		box-shadow: 0 0 0 0 var(--ev-glow);
+	}
+	70% {
+		box-shadow: 0 0 0 6px rgba(0, 0, 0, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+	}
 }
-@keyframes ev-spin { to { transform: rotate(360deg); } }
-@keyframes ev-rise { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-@keyframes ev-shimmer { to { background-position: -120% 0; } }
-@keyframes ev-drawer-in { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes ev-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ev-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes ev-shimmer {
+	to {
+		background-position: -120% 0;
+	}
+}
+@keyframes ev-drawer-in {
+	from {
+		opacity: 0;
+		transform: translateX(28px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+@keyframes ev-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition-duration: 0.001ms !important; }
+	* {
+		animation: none !important;
+		transition-duration: 0.001ms !important;
+	}
 }
 
 /* ---- Base + ambient backdrop ---------------------------------------------- */
-html, body {
-  margin: 0;
-  height: 100%;
-  background: var(--ev-bg);
-  color: var(--ev-text);
-  font-family: var(--ml-font-sans);
+html,
+body {
+	margin: 0;
+	height: 100%;
+	background: var(--ev-bg);
+	color: var(--ev-text);
+	font-family: var(--ev-font-sans);
 }
 
 /* Custom scrollbars matching the design */
-*::-webkit-scrollbar { width: 11px; height: 11px; }
-*::-webkit-scrollbar-thumb {
-  background: var(--ev-border-2);
-  border-radius: 8px;
-  border: 3px solid transparent;
-  background-clip: content-box;
+*::-webkit-scrollbar {
+	width: 11px;
+	height: 11px;
 }
-*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+	background: var(--ev-border-2);
+	border-radius: 8px;
+	border: 3px solid transparent;
+	background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* ---- Native form controls -------------------------------------------------
+   Text inputs stay real <input>/<textarea> elements rather than being wrapped
+   in components, so they keep their native semantics (autofill, spellcheck,
+   IME, form validation). These classes are the only styling they need. */
+.ev-input,
+.ev-textarea {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 8px 11px;
+	border: 1px solid var(--ev-border-2);
+	border-radius: var(--ev-radius-md);
+	background: var(--ev-surface);
+	color: var(--ev-text);
+	font-family: var(--ev-font-sans);
+	font-size: 13px;
+	line-height: 1.4;
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.ev-textarea {
+	font-family: var(--ev-font-mono);
+	font-size: 12.5px;
+	resize: vertical;
+}
+
+.ev-input::placeholder,
+.ev-textarea::placeholder {
+	color: var(--ev-faint);
+}
+
+.ev-input:focus,
+.ev-textarea:focus {
+	outline: none;
+	border-color: var(--ev-accent);
+	box-shadow: 0 0 0 3px var(--ev-accent-dim);
+}
+
+.ev-input:disabled,
+.ev-textarea:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}

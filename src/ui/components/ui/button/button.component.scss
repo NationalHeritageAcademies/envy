@@ -1,0 +1,100 @@
+:host {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	border: 1px solid transparent;
+	border-radius: var(--ev-radius-md);
+	font-family: var(--ev-font-sans);
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+	background: transparent;
+	color: var(--ev-dim);
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+
+:host(:focus-visible) {
+	outline: 2px solid var(--ev-accent);
+	outline-offset: 2px;
+}
+
+:host(:disabled) {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+/* Sizes ---------------------------------------------------------------- */
+
+:host([data-size='sm']) {
+	height: 28px;
+	padding: 0 10px;
+	font-size: 12px;
+}
+
+:host([data-size='md']) {
+	height: 34px;
+	padding: 0 14px;
+	font-size: 13px;
+}
+
+/* Icon-only buttons collapse to a square so they line up with the sm row. */
+:host(.icon-only) {
+	padding: 0;
+	width: 28px;
+}
+
+/* Variants ------------------------------------------------------------- */
+
+:host([data-variant='ghost']:hover:not(:disabled)) {
+	background: var(--ev-surface);
+	color: var(--ev-text);
+}
+
+:host([data-variant='primary']) {
+	background: var(--ev-accent);
+	color: var(--ev-accent-on);
+}
+
+:host([data-variant='primary']:hover:not(:disabled)) {
+	background: var(--ev-accent-2);
+}
+
+:host([data-variant='primary']:active:not(:disabled)) {
+	background: var(--ev-accent-deep);
+}
+
+:host([data-variant='secondary']) {
+	background: var(--ev-surface);
+	border-color: var(--ev-border);
+	color: var(--ev-text);
+}
+
+:host([data-variant='secondary']:hover:not(:disabled)) {
+	background: var(--ev-surface-2);
+	border-color: var(--ev-border-2);
+}
+
+:host([data-variant='outline']) {
+	border-color: var(--ev-border-2);
+	color: var(--ev-text);
+}
+
+:host([data-variant='outline']:hover:not(:disabled)) {
+	background: var(--ev-surface);
+	border-color: var(--ev-accent);
+	color: var(--ev-accent);
+}
+
+:host([data-variant='danger']) {
+	background: var(--ev-danger);
+	color: #ffffff;
+}
+
+:host([data-variant='danger']:hover:not(:disabled)) {
+	filter: brightness(1.08);
+}

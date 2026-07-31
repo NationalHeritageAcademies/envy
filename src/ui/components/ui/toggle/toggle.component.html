@@ -1,0 +1,4 @@
+<label class="wrap">
+	<input type="checkbox" [checked]="checked()" [disabled]="disabled()" [attr.aria-label]="ariaLabel() || null" (change)="onChange($event)" />
+	<span class="track" aria-hidden="true"><span class="knob"></span></span>
+</label>

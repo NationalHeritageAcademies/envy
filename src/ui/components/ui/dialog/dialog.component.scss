@@ -1,0 +1,51 @@
+.ev-dialog {
+	padding: 0;
+	border: 1px solid var(--ev-border-2);
+	border-radius: var(--ev-radius-xl);
+	background: var(--ev-bg-2);
+	color: var(--ev-text);
+	box-shadow: var(--ev-shadow-lg);
+	width: calc(100vw - 64px);
+	max-width: var(--ev-dialog-max-width, 540px);
+	max-height: calc(100vh - 96px);
+	overflow: hidden;
+}
+
+.ev-dialog::backdrop {
+	background: rgb(0 0 0 / 0.45);
+}
+
+.surface {
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 96px);
+}
+
+.header {
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--ev-border);
+	padding: 14px 18px;
+}
+
+.header:empty {
+	display: none;
+}
+
+.body {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 18px;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.footer {
+	flex-shrink: 0;
+	border-top: 1px solid var(--ev-border);
+	padding: 14px 18px;
+}
+
+.footer:empty {
+	display: none;
+}

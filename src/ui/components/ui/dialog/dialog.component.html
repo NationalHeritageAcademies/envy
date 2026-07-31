@@ -1,0 +1,13 @@
+<dialog #dlg class="ev-dialog" [style.--ev-dialog-max-width]="maxWidth()" (close)="onNativeClose()" (click)="onBackdropClick($event)">
+	<div class="surface">
+		<header class="header">
+			<ng-content select="[slot=dialog-header]" />
+		</header>
+		<div class="body">
+			<ng-content />
+		</div>
+		<footer class="footer">
+			<ng-content select="[slot=dialog-footer]" />
+		</footer>
+	</div>
+</dialog>
