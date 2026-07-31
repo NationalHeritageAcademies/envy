@@ -34,12 +34,18 @@ CA_CERT="$6"
 HTTP_PORT="$7"
 HTTPS_PORT="$8"
 
-LABEL="com.melodicdev.envy"
+LABEL="com.nhaschools.envy"
 PLIST="/Library/LaunchDaemons/${LABEL}.plist"
+# The Melodic-era label, retired below. A machine that upgraded from a
+# Melodic-era build still has that daemon loaded and holding 53/80/443, so
+# installing ours without booting it out first would leave two daemons fighting
+# for the same ports — and ours would be the one that fails to bind.
+LEGACY_LABEL="com.melodicdev.envy"
+LEGACY_PLIST="/Library/LaunchDaemons/${LEGACY_LABEL}.plist"
 # Must match electron-builder appId. Lets macOS attribute the background item to
 # Envy (name + icon) in Login Items & Extensions instead of falling back to the
 # signing certificate's name.
-BUNDLE_ID="dev.melodic.envy"
+BUNDLE_ID="com.nhaschools.envy"
 SYSTEM_KEYCHAIN="/Library/Keychains/System.keychain"
 CA_NAME="Envy Local CA"
 
@@ -49,6 +55,13 @@ echo "→ Installing Envy LaunchDaemon (${LABEL})"
 
 # Tear down any previous instance so this is idempotent.
 launchctl bootout "system/${LABEL}" 2>/dev/null || true
+
+# …and retire the Melodic-era daemon if this machine still carries one.
+launchctl bootout "system/${LEGACY_LABEL}" 2>/dev/null || true
+if [[ -f "${LEGACY_PLIST}" ]]; then
+  rm -f "${LEGACY_PLIST}"
+  echo "  retired ${LEGACY_PLIST}"
+fi
 
 cat > "${PLIST}" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>

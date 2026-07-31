@@ -20,7 +20,17 @@ const isWin = process.platform === 'win32';
 // install-daemon.ps1 for why a task and not a Service). The two persistence
 // mechanisms differ, but both run the *same* engine (proxy + DNS + Discovery +
 // hosts-file sync) — only how they're installed/queried diverges below.
-const LABEL = 'com.melodicdev.envy';
+// Matches the electron-builder appId. Renamed from the Melodic-era
+// `com.melodicdev.envy` when the NHA fork took over releases.
+//
+// Status is deliberately keyed on this label alone. A machine upgrading from a
+// Melodic-era build still has the old daemon loaded and serving, and will show
+// "URLs off" until the user clicks Enable once — at which point
+// install-daemon.sh boots out the old label and takes over. Reporting the old
+// daemon as installed would read better for that one session, but nothing would
+// ever retire it, leaving a root daemon on 53/80/443 that no version of Envy
+// manages. One click that converges beats a tidy pill that never does.
+const LABEL = 'com.nhaschools.envy';
 const PLIST = `/Library/LaunchDaemons/${LABEL}.plist`;
 const TASK_NAME = 'EnvyDaemon';
 

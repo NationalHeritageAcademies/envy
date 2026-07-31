@@ -115,12 +115,20 @@ reassigning a container in the app “just works” live.
 auth dialog):
 1. The GUI materializes `config.json` and generates the CA (in your data dir).
 2. `scripts/install-daemon.sh` (root) writes the LaunchDaemon plist
-   (`/Library/LaunchDaemons/com.melodicdev.envy.plist`), `launchctl bootstrap`s
+   (`/Library/LaunchDaemons/com.nhaschools.envy.plist`), `launchctl bootstrap`s
    it, and exits. **Resolver files + CA trust are NOT done here** — the daemon
    does them as a real root process (which is what makes it a single prompt).
 
 `scripts/uninstall-daemon.sh` fully reverses it (bootout, remove plist + resolver
 files + the “Envy Local CA” from the System keychain).
+
+The label matches the electron-builder `appId`. It was `com.melodicdev.envy`
+before the NHA fork, so both scripts also boot out and delete that plist —
+install because two daemons would otherwise fight over 53/80/443, uninstall so
+"remove Envy" doesn't strand a root daemon on an upgraded machine. A machine
+carrying the old daemon reads as "URLs off" until Enable is clicked once; see
+the comment on `LABEL` in `daemon-control.ts` for why that beats reporting it as
+installed.
 
 > The plist deliberately does **not** bake in the domain list — the daemon reads
 > it from `config.json` and watches that file, which is what enables live
