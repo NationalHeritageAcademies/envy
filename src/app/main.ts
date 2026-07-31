@@ -455,8 +455,8 @@ function openSettings(): void {
 
 // Help links. Documentation points at the marketing site's /docs page.
 const HELP_LINKS = {
-  docs: 'https://envy.melodic.dev/docs',
-  reportIssue: 'https://github.com/MelodicDevelopment/envy/issues/new',
+  docs: 'https://github.com/NationalHeritageAcademies/envy/tree/main/docs',
+  reportIssue: 'https://github.com/NationalHeritageAcademies/envy/issues/new',
 };
 
 function helpSubmenu(): Electron.MenuItemConstructorOptions {

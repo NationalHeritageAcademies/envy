@@ -12,7 +12,7 @@ Prerequisites:
   to the standard local Docker socket
 
 ```bash
-git clone https://github.com/MelodicDevelopment/envy.git
+git clone https://github.com/NationalHeritageAcademies/envy.git
 cd envy
 npm install
 npm run dev          # hot-reloading dev app
@@ -72,14 +72,14 @@ parity always fit.
 
 ## Reporting bugs
 
-Use the [bug report template](https://github.com/MelodicDevelopment/envy/issues/new/choose).
+Use the [bug report template](https://github.com/NationalHeritageAcademies/envy/issues/new/choose).
 Please include your OS, Docker provider (Docker Desktop / OrbStack / colima),
 Envy version, and steps to reproduce.
 
 ## Security issues
 
 Please don't open public issues for vulnerabilities — follow
-[SECURITY.md](SECURITY.md) (private reporting or support@melodic.dev).
+[SECURITY.md](SECURITY.md) (private reporting or rhopkins@nhaschools.com).
 
 ## License
 

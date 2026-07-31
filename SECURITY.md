@@ -9,8 +9,8 @@ between renderer and main process — please **do not open a public issue**.
 
 Instead, either:
 
-- use GitHub's [private vulnerability reporting](https://github.com/MelodicDevelopment/envy/security/advisories/new), or
-- email **support@melodic.dev** with the details.
+- use GitHub's [private vulnerability reporting](https://github.com/NationalHeritageAcademies/envy/security/advisories/new), or
+- email **rhopkins@nhaschools.com** with the details.
 
 Include steps to reproduce and what an attacker could gain. You'll get an
 acknowledgment as soon as possible, and a fix will be released before any

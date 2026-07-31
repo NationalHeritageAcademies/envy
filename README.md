@@ -2,7 +2,7 @@
 
 > Every Docker container gets a real HTTPS URL.
 
-[![CI](https://github.com/MelodicDevelopment/envy/actions/workflows/ci.yml/badge.svg)](https://github.com/MelodicDevelopment/envy/actions/workflows/ci.yml)
+[![CI](https://github.com/NationalHeritageAcademies/envy/actions/workflows/ci.yml/badge.svg)](https://github.com/NationalHeritageAcademies/envy/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron&logoColor=white)](https://www.electronjs.org)
 [![Melodic JS](https://img.shields.io/badge/Melodic_JS-2-34d399)](https://github.com/MelodicDevelopment/melodic)
@@ -13,7 +13,7 @@ zero‑config HTTPS. Start a container and it's instantly reachable at a trusted
 `https://` address: no port juggling, no `/etc/hosts` editing, no
 self‑signed‑cert warnings.
 
-![The Envy app listing Docker containers, each with its own https URL](web/public/assets/img/screenshot-hero.png)
+![The Envy app listing Docker containers, each with its own https URL](docs/assets/screenshot-hero.png)
 
 Built with Electron + TypeScript and the [Melodic](https://github.com/MelodicDevelopment/melodic) component library.
 
@@ -43,7 +43,7 @@ Built with Electron + TypeScript and the [Melodic](https://github.com/MelodicDev
 
 ## Install
 
-Grab a prebuilt app from [GitHub Releases](https://github.com/MelodicDevelopment/envy/releases):
+Grab a prebuilt app from [GitHub Releases](https://github.com/NationalHeritageAcademies/envy/releases):
 
 - **macOS** — universal `.dmg` (Apple Silicon & Intel)
 - **Windows** — `.exe` installer (x64 & arm64)
@@ -57,7 +57,7 @@ Prerequisites: Node.js 20+, npm, and a local Docker engine (Docker Desktop,
 OrbStack, or colima).
 
 ```bash
-git clone https://github.com/MelodicDevelopment/envy.git
+git clone https://github.com/NationalHeritageAcademies/envy.git
 cd envy
 npm install
 npm run dev          # hot-reloading dev app
@@ -108,7 +108,6 @@ control — they take precedence over the in‑app settings:
 | Full user guide (every screen and workflow) | [docs/user-guide.md](docs/user-guide.md) |
 | Architecture — engine, daemon, routing model | [docs/architecture.md](docs/architecture.md) |
 | Development — layout, packaging, signing, platforms | [docs/development.md](docs/development.md) |
-| Hosted docs (same content, prettier) | [envy.melodic.dev/docs](https://envy.melodic.dev/docs) |
 | Melodic component-library notes | [MELODIC-NOTES.md](MELODIC-NOTES.md) |
 
 ## Project layout
@@ -123,7 +122,6 @@ src/
   cli/         Internal engine/daemon entry points (not a distributed CLI)
 docs/          User + contributor documentation
 scripts/       Build, packaging, signing, release helpers
-web/           Marketing site (PHP, deployed on Railway)
 ```
 
 ## Scripts
@@ -158,7 +156,7 @@ Linux as planned follow‑ups (see [Development](docs/development.md)).
 Contributions are welcome — bug reports, feature requests, and pull requests.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, how to run the tests,
 and what to expect from the PR process. For anything non‑trivial, open an
-[issue](https://github.com/MelodicDevelopment/envy/issues) first so we can
+[issue](https://github.com/NationalHeritageAcademies/envy/issues) first so we can
 agree on the approach before you invest time.
 
 Found a security issue? Please follow [SECURITY.md](SECURITY.md) instead of
@@ -182,6 +180,10 @@ makes is checking GitHub Releases for app updates.
 ## License
 
 [MIT](LICENSE) © 2026 Rick Hopkins (Melodic Development).
+
+This repository is the National Heritage Academies fork of
+[MelodicDevelopment/envy](https://github.com/MelodicDevelopment/envy), maintained
+for NHA's internal tooling. Releases here are built and published by NHA.
 
 Docker is a trademark of Docker, Inc. Envy is an independent project, not
 affiliated with or endorsed by Docker, Inc.

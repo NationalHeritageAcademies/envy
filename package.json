@@ -4,12 +4,12 @@
   "version": "0.3.0",
   "private": true,
   "license": "MIT",
-  "author": "Rick Hopkins <support@melodic.dev>",
+  "author": "Rick Hopkins <rhopkins@nhaschools.com>",
   "type": "module",
   "description": "A clean container manager with automatic *.envy URLs and trusted local HTTPS for your services.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MelodicDevelopment/envy.git"
+    "url": "https://github.com/NationalHeritageAcademies/envy.git"
   },
   "main": "out/main/index.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "package:dist": "npm run build && npm run icons && ENVY_NOTARIZE=1 electron-builder --mac --win",
     "package:all": "npm run build && npm run icons && ENVY_NOTARIZE=1 electron-builder -mwl",
     "package:win:test": "npm run build && npm run icons && SKIP_WIN_SIGN=1 electron-builder --win --publish never",
-    "release": "node scripts/bump-version.mjs && node scripts/sync-web-version.mjs && npm run package:all && node scripts/release.mjs",
+    "release": "node scripts/bump-version.mjs && npm run package:all && node scripts/release.mjs",
     "release:upload": "node scripts/release.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",

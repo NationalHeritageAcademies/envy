@@ -1,4 +1,7 @@
-appId: dev.melodic.envy
+# NOTE: changed from dev.melodic.envy when the NHA fork took over releases.
+# A new appId means Melodic-era installs will NOT auto-update into NHA builds
+# (separate app identity) — intended; NHA publishes from its own repo.
+appId: com.nhaschools.envy
 productName: Envy
 directories:
   output: dist
@@ -9,7 +12,7 @@ afterSign: scripts/notarize.cjs
 # linux AppImage). `npm run release` packages and uploads the artifacts there.
 publish:
   - provider: github
-    owner: MelodicDevelopment
+    owner: NationalHeritageAcademies
     repo: envy
 # Envy ships no native module it needs at runtime — it talks to the local
 # Docker socket, never a remote ssh:// host. The only native deps in the tree
@@ -90,8 +93,8 @@ linux:
         - arm64
   icon: build/icon.png
   category: Development
-  maintainer: Rick Hopkins <support@melodic.dev>
-  vendor: Melodic Development
+  maintainer: Rick Hopkins <rhopkins@nhaschools.com>
+  vendor: National Heritage Academies
 dmg:
   title: Envy ${version}
   background: build/background.png

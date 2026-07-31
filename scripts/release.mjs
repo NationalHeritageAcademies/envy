@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-const REPO = 'MelodicDevelopment/envy';
+const REPO = 'NationalHeritageAcademies/envy';
 
 const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const tag = `v${pkg.version}`;
