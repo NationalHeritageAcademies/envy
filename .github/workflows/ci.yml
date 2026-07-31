@@ -21,5 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      # Separate from `typecheck`: plain tsc never looks inside an Angular
+      # template, so a broken binding would otherwise reach a build.
+      - run: npm run typecheck:ui
       - run: npm run lint
       - run: npm test
