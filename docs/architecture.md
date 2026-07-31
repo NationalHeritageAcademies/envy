@@ -8,8 +8,8 @@ Envy has three cooperating processes:
 
 ```
 ┌─────────────────────────────┐         ┌──────────────────────────────┐
-│  Electron app (unprivileged) │  IPC    │  Renderer (web components)    │
-│  src/app/main.ts            │ ◀─────▶ │  src/ui/*  (@melodicdev/*)    │
+│  Electron app (unprivileged) │  IPC    │  Renderer (Angular 21)        │
+│  src/app/main.ts            │ ◀─────▶ │  src/ui/*                     │
 │   • DATA engine (read/act)  │ preload │   • Services/Images/Domains   │
 │   • daemon control          │         │   • Activity / Inspect drawer  │
 │   • docker launch           │         └──────────────────────────────┘
@@ -141,12 +141,20 @@ interface + `CHANNELS` map. `src/app/preload.ts` exposes `window.envy` via
 `contextBridge`; `src/app/main.ts` registers the `ipcMain` handlers and pushes
 events (services changed, status, pull/stats/log/exec streams).
 
-The renderer (`src/ui/`) is **`@melodicdev/core`** web components with a small
-signal store (`src/ui/store/{state,actions}.ts`). The green design is applied by
-**mapping the `--ev-*` palette onto Melodic’s `--ml-*` tokens**
-(`src/ui/public/tokens.css`), so `@melodicdev/components` render on‑theme with no
-per‑component CSS. See [MELODIC-NOTES.md](../MELODIC-NOTES.md) for what’s custom
-vs. library and the gaps worth filing.
+The renderer (`src/ui/`) is a **zoneless Angular 21** app — standalone
+components, signals, `OnPush` throughout. State lives in signals services
+(`src/ui/store/*.service.ts`) that only `EnvyFacade` writes to; components
+inject the state services to read and the facade to act, so no component calls
+`window.envy` for a mutation. The exceptions are the streaming subscriptions
+(logs, stats, exec), which belong to the component that renders them and are
+torn down with it.
+
+There is no component library underneath: `src/ui/components/ui` holds
+hand-rolled primitives (button, dialog, icon, spinner, toggle) styled straight
+from the `--ev-*` tokens in `src/ui/public/tokens.css`. Icons are Phosphor path
+data inlined into a generated `icon-set.ts` (`npm run icons:set`) rather than a
+font — under `file://` a mis-resolved `@font-face` renders every glyph as a tofu
+box, and only in a packaged build.
 
 ### Resilience details worth knowing
 - **Offline → online recovery:** if Docker is down at launch, main polls every

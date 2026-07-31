@@ -5,7 +5,7 @@
 [![CI](https://github.com/NationalHeritageAcademies/envy/actions/workflows/ci.yml/badge.svg)](https://github.com/NationalHeritageAcademies/envy/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-34d399.svg)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron&logoColor=white)](https://www.electronjs.org)
-[![Melodic JS](https://img.shields.io/badge/Melodic_JS-2-34d399)](https://github.com/MelodicDevelopment/melodic)
+[![Angular](https://img.shields.io/badge/Angular-21-34d399?logo=angular&logoColor=white)](https://angular.dev)
 
 A free, open-source (MIT), cross‑platform container manager that gives every
 Docker container a clean, auto‑generated `https://<name>.<domain>` URL — with
@@ -15,7 +15,7 @@ self‑signed‑cert warnings.
 
 ![The Envy app listing Docker containers, each with its own https URL](docs/assets/screenshot-hero.png)
 
-Built with Electron + TypeScript and the [Melodic](https://github.com/MelodicDevelopment/melodic) component library.
+Built with Electron + TypeScript, with an [Angular](https://angular.dev) renderer.
 
 > Envy is a **client + local networking layer**. It does not run containers
 > itself — it talks to whatever Docker daemon you already have (Docker
@@ -108,7 +108,6 @@ control — they take precedence over the in‑app settings:
 | Full user guide (every screen and workflow) | [docs/user-guide.md](docs/user-guide.md) |
 | Architecture — engine, daemon, routing model | [docs/architecture.md](docs/architecture.md) |
 | Development — layout, packaging, signing, platforms | [docs/development.md](docs/development.md) |
-| Melodic component-library notes | [MELODIC-NOTES.md](MELODIC-NOTES.md) |
 
 ## Project layout
 
@@ -118,7 +117,7 @@ src/
   daemon/      Privileged background daemon — DNS + reverse proxy on 53/80/443
   app/         Electron main process (tray, window, IPC handlers, updates)
   ipc/         Typed IPC contract between renderer and main process
-  ui/          Renderer — Melodic web components (services, images, domains, activity)
+  ui/          Renderer — Angular app (services, images, domains, activity)
   cli/         Internal engine/daemon entry points (not a distributed CLI)
 docs/          User + contributor documentation
 scripts/       Build, packaging, signing, release helpers
@@ -138,7 +137,9 @@ scripts/       Build, packaging, signing, release helpers
 ## Tech stack
 
 - **Electron** 33 · **TypeScript** (strict, `noUncheckedIndexedAccess`)
-- **Melodic** (`@melodicdev/core` + `@melodicdev/components`) for the UI
+- **Angular** 21 for the renderer — zoneless, standalone components, signals,
+  and hand-rolled UI primitives on the `--ev-*` design tokens (no component
+  library)
 - **dockerode** (Docker socket) · **dns2** (local resolver) · **http-proxy**
   (reverse proxy) · **node-forge** (local CA + leaf certs) · **xterm.js**
   (exec shell)

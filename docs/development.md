@@ -30,10 +30,10 @@ npm install
 | `npm test` | Vitest. |
 
 ### Two dev gotchas
-- **MelodicComponent edits need a full restart.** Hot reload can’t re‑`define`
-  a custom element, so changes to any `*.component`/view under `src/ui/components`
-  require quitting and re‑running (`npm run dev`) — *not* just Cmd‑R. Plain CSS
-  (`src/ui/public/tokens.css`) **does** hot‑reload.
+- **Main‑process changes need a restart.** Edits under `src/app` (and the IPC
+  contract) only take effect on a fresh `npm run dev`. Renderer edits go through
+  the Vite dev server, so Cmd‑R is enough for those — no more quitting the app
+  after every component change, which the old custom‑element renderer required.
 - **Don’t bind privileged ports in dev.** The GUI is data‑only; serving on
   80/443 is the daemon’s job. To test the engine headless on unprivileged ports:
   ```bash
@@ -53,11 +53,14 @@ src/
     daemon-control.ts  install/uninstall/status via sudo-prompt
     docker-launch.ts   detect + launch the Docker provider
   ipc/         contract.ts — typed EnvyApi + CHANNELS (single source of truth)
-  ui/          Renderer (web components + signal store)
-    components/  envy-app, services-view, images-view, domains-view, activity-view,
-                 inspect-drawer, shell-term, run-dialog, brand, toast
-    store/       state.ts (signals), actions.ts
-    public/      tokens.css (the --ev-* → --ml-* theme mapping)
+  ui/          Renderer — Angular 21 (zoneless, standalone, signals, OnPush)
+    app/         app.component.ts (mount point), app.config.ts (providers)
+    components/  envy-app (shell), services-view, images-view, domains-view,
+                 activity-view, settings-view, inspect-drawer, shell-term,
+                 run-dialog, brand, toast
+      ui/        hand-rolled primitives: button, dialog, icon, spinner, toggle
+    store/       signals services (docker/ui/theme/app-settings) + envy.facade.ts
+    public/      tokens.css (the --ev-* palette, dark + light)
     main.ts, index.html
   cli/         envy.ts — commander CLI
 scripts/       install-daemon.sh, uninstall-daemon.sh, setup-macos.sh,
@@ -76,9 +79,10 @@ Use this as the template when adding capabilities:
 2. **Contract** — add the method + a channel name to `src/ipc/contract.ts`.
 3. **Main** — register an `ipcMain.handle`/`.on` in `src/app/main.ts`.
 4. **Preload** — expose it on `window.envy` in `src/app/preload.ts`.
-5. **Store** — add an action in `src/ui/store/actions.ts` (+ signals in
-   `state.ts` if it has UI state).
-6. **UI** — call it from a component, leaning on `@melodicdev/components`.
+5. **Store** — add the action to `src/ui/store/envy.facade.ts` (+ a signal on
+   the relevant state service if it has UI state).
+6. **UI** — inject the facade in a component and call it, composing the
+   primitives in `src/ui/components/ui`.
 
 Run `npm run typecheck` after — the typed contract catches mismatches across all
 layers.
@@ -86,14 +90,20 @@ layers.
 ## Theming
 
 The palette lives once in `src/ui/public/tokens.css` as `--ev-*` (dark + light),
-then maps onto Melodic’s `--ml-*` semantic tokens. Change a color there and it
-propagates to every `ml-*` component automatically. Only bespoke surfaces use a
-thin `--ev-*` layer directly. See [MELODIC-NOTES.md](../MELODIC-NOTES.md).
+and every component consumes it directly — there is no second token vocabulary
+to map onto. Change a color there and it propagates everywhere.
+
+tokens.css is injected at runtime by `src/ui/bootstrap-styles.ts` rather than
+linked from `index.html`, so Vite can’t rewrite its href into an absolute path
+(which resolves to the filesystem root under `file://` in a packaged build, and
+silently drops every token). It also carries the global rules that component
+styles can’t: base element styles, keyframes, and the `.ev-input` /
+`.ev-textarea` classes the native form controls use.
 
 ## Packaging & signing
 
 `electron-builder.yml` (mirrors the Coax setup):
-- **appId** `dev.melodic.envy`; mac dmg+zip (universal), win nsis, linux
+- **appId** `com.nhaschools.envy`; mac dmg+zip (universal), win nsis, linux
   AppImage+deb.
 - **Code signing** uses a Developer ID from the keychain (electron‑builder
   auto‑detects); hardened runtime + `build/entitlements.mac.plist` (which
@@ -143,7 +153,5 @@ specific provisioning (`/etc/resolver`, `security add-trusted-cert`,
 - Private‑registry auth (read `docker login` creds or a login flow).
 - “Update available” badge (registry digest comparison).
 - Live offline detection (flip the pill when Docker quits mid‑session).
-- Convert custom components (sidebar/card/drawer/tabs/table) to `ml-*` and file
-  the gaps in [MELODIC-NOTES.md](../MELODIC-NOTES.md).
 - Volumes (and maybe Networks) management views.
 - Windows/Linux daemon (above).
