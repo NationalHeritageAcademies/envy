@@ -82,6 +82,8 @@ function mapContainer(info: ContainerInfo): ContainerSummary {
  */
 export class DockerClient extends EventEmitter {
   private docker: Docker;
+  /** The live /events response; replaced (old one destroyed) on each re-arm. */
+  private eventsStream?: NodeJS.ReadableStream & { destroy?: () => void };
 
   constructor() {
     super();
@@ -204,9 +206,27 @@ export class DockerClient extends EventEmitter {
     });
   }
 
-  /** Subscribe to the Docker event stream; emits 'event' on every container change. */
+  /** Subscribe to the Docker event stream; emits 'event' on every container
+   *  change and 'stream-error' exactly once when the stream dies — whether it
+   *  errors, ends cleanly (daemon restart, engine idle-stop), or just closes.
+   *  A clean 'end' is still a loss: no more events will ever arrive. */
   async watchEvents(): Promise<void> {
-    const stream = await this.docker.getEvents();
+    // Drop any previous stream so a re-arm never leaves two subscriptions
+    // feeding 'event' (or a zombie stream reporting a stale loss). Detach the
+    // reference first: destroy() fires 'close', and the loss guard below keys
+    // off `this.eventsStream` to tell a superseded stream from the live one.
+    const prev = this.eventsStream;
+    this.eventsStream = undefined;
+    prev?.destroy?.();
+    const stream = (await this.docker.getEvents()) as NodeJS.ReadableStream & {
+      socket?: import('node:net').Socket;
+      destroy?: () => void;
+    };
+    this.eventsStream = stream;
+    // The stream can sit idle for hours; TCP keepalive turns a half-open
+    // connection (host sleep/wake, remote daemon) into a real 'error'/'close'
+    // instead of a silent forever-hang. No-op on the local Unix socket.
+    try { stream.socket?.setKeepAlive(true, 30_000); } catch { /* non-TCP transport */ }
     stream.on('data', (chunk: Buffer) => {
       for (const line of chunk.toString('utf8').split('\n')) {
         if (!line.trim()) continue;
@@ -218,7 +238,17 @@ export class DockerClient extends EventEmitter {
         }
       }
     });
-    stream.on('error', (err: Error) => this.emit('stream-error', err));
+    // 'error' is usually followed by 'close' (and 'end' can be too) — report
+    // the loss once, whichever signal lands first.
+    let reported = false;
+    const lost = (err: Error): void => {
+      if (reported || this.eventsStream !== stream) return;
+      reported = true;
+      this.emit('stream-error', err);
+    };
+    stream.on('error', lost);
+    stream.on('end', () => lost(new Error('Docker event stream ended')));
+    stream.on('close', () => lost(new Error('Docker event stream closed')));
   }
 
   async removeImage(id: string, force = true): Promise<void> {

@@ -244,6 +244,23 @@ export async function chooseTarget(
 const REPROBE_DELAY_MS = 3000;
 const MAX_REPROBES = 5;
 
+/** How often the reconciliation poll re-lists containers. It exists for the
+ *  one failure no stream signal can catch — a half-open events socket that
+ *  emits neither 'data' nor 'end' nor 'error' (typically after host sleep) —
+ *  so it only needs to be frequent enough that a frozen listing self-heals
+ *  within a tolerable window. Exported for tests. */
+export const RECONCILE_INTERVAL_MS = 45_000;
+
+/** What the reconciliation poll compares between ticks: which containers
+ *  exist and whether each runs. Status text is excluded — it embeds uptime
+ *  ("Up 3 minutes"), which would differ on every tick. */
+function containerSnapshot(containers: ContainerSummary[]): string {
+  return containers
+    .map((c) => `${c.id}:${c.state}:${c.ip ?? ''}`)
+    .sort()
+    .join('|');
+}
+
 export class Discovery {
   readonly routes = new RouteTable();
   /** Whether container IPs are host-routable. Settled lazily on rebuild by
@@ -256,6 +273,9 @@ export class Discovery {
   private readonly httpConfirmed = new Set<string>();
   private readonly reprobeCounts = new Map<string, number>();
   private reprobeTimer?: NodeJS.Timeout;
+  private reconcileTimer?: NodeJS.Timeout;
+  /** Container-list fingerprint as of the last rebuild, for the reconcile poll. */
+  private lastSnapshot = '';
 
   constructor(
     private readonly docker: DockerClient,
@@ -273,6 +293,16 @@ export class Discovery {
     // Registered once for the life of this Discovery; resume() reuses it.
     this.docker.on('event', this.onDockerEvent);
     await this.docker.watchEvents();
+    this.startReconcile();
+  }
+
+  /** Cancel this Discovery's timers. The route table and listeners are left
+   *  intact — stop() is for engine shutdown, not an outage. */
+  stop(): void {
+    if (this.reconcileTimer) clearInterval(this.reconcileTimer);
+    this.reconcileTimer = undefined;
+    if (this.reprobeTimer) clearTimeout(this.reprobeTimer);
+    this.reprobeTimer = undefined;
   }
 
   // Container lifecycle transitions are the only events that move routes.
@@ -290,10 +320,29 @@ export class Discovery {
     this.routable = assumeContainerIpsRoutable();
     await this.rebuild();
     await this.docker.watchEvents();
+    this.startReconcile(); // no-op when the interval survived the outage
+  }
+
+  /** Low-frequency backstop for the event stream: if the container list has
+   *  drifted from the last rebuild without any Docker event arriving (the
+   *  half-open-socket case where the stream dies silently), rebuild. One
+   *  interval per Discovery — start()/resume() re-arming never stacks a
+   *  second one — and errors are swallowed: Docker being down mid-tick is the
+   *  stream-error/reconnect path's problem, not the poll's. */
+  private startReconcile(): void {
+    if (this.reconcileTimer) return;
+    this.reconcileTimer = setInterval(() => {
+      void (async () => {
+        const containers = await this.docker.listContainers(true);
+        if (containerSnapshot(containers) !== this.lastSnapshot) await this.rebuild();
+      })().catch(() => {});
+    }, RECONCILE_INTERVAL_MS);
+    this.reconcileTimer.unref?.();
   }
 
   async rebuild(): Promise<void> {
     const containers = await this.docker.listContainers(true);
+    this.lastSnapshot = containerSnapshot(containers);
     if (this.routable === undefined) this.routable = await detectRoutability(containers);
     const routes: Route[] = [];
     const uncertain: string[] = [];

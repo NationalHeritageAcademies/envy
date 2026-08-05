@@ -1,8 +1,18 @@
 import { createServer, type Server } from 'node:http';
 import { createServer as createTcpServer, type Server as TcpServer } from 'node:net';
-import { afterAll, describe, expect, it } from 'vitest';
-import { chooseTarget, hostsFor, probeContainerIp, probeHttp, type TargetCandidate } from './discovery.js';
-import type { ContainerSummary } from './docker.js';
+import { EventEmitter } from 'node:events';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  chooseTarget,
+  Discovery,
+  hostsFor,
+  probeContainerIp,
+  probeHttp,
+  RECONCILE_INTERVAL_MS,
+  type TargetCandidate,
+} from './discovery.js';
+import type { ContainerSummary, DockerClient } from './docker.js';
+import type { EngineConfig } from './config.js';
 
 function cand(privatePort: number, port = privatePort): TargetCandidate {
   return { privatePort, host: '127.0.0.1', port };
@@ -229,5 +239,97 @@ describe('probeContainerIp', () => {
   it('treats a black-holed address as not routable', async () => {
     // TEST-NET-3 is never routed; SYNs die quietly — the Docker Desktop shape.
     expect(await probeContainerIp('203.0.113.1', 80, 250)).toBe(false);
+  });
+});
+
+/** DockerClient stand-in: a mutable container list and an event stream that
+ *  never delivers anything — the silent half-open-socket shape. */
+class FakeDocker extends EventEmitter {
+  containers: ContainerSummary[] = [];
+  listCalls = 0;
+  async listContainers(): Promise<ContainerSummary[]> {
+    this.listCalls++;
+    return this.containers;
+  }
+  async watchEvents(): Promise<void> { /* stream stays silent */ }
+}
+
+const testConfig: EngineConfig = {
+  domains: ['envy'],
+  assignments: {},
+  httpPort: 80,
+  httpsPort: 443,
+  dnsPort: 5353,
+  bindAddress: '127.0.0.1',
+  resolveTo: '127.0.0.1',
+  dataDir: '/tmp/envy-test',
+};
+
+/** A running container with one published web port — resolves without probing. */
+function webContainer(name: string, publicPort: number): ContainerSummary {
+  return { ...container(name), ports: [{ privatePort: 80, publicPort, type: 'tcp' }] };
+}
+
+describe('reconciliation poll', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  function build(...containers: ContainerSummary[]): { docker: FakeDocker; discovery: Discovery } {
+    const docker = new FakeDocker();
+    docker.containers = containers;
+    return { docker, discovery: new Discovery(docker as unknown as DockerClient, testConfig) };
+  }
+
+  it('rebuilds when the container list drifts without any Docker event', async () => {
+    const { docker, discovery } = build(webContainer('a', 3001));
+    await discovery.start();
+    expect(discovery.routes.list().map((r) => r.host)).toEqual(['a.envy']);
+
+    docker.containers = [webContainer('a', 3001), webContainer('b', 3002)];
+    await vi.advanceTimersByTimeAsync(RECONCILE_INTERVAL_MS);
+    expect(discovery.routes.list().map((r) => r.host)).toEqual(['a.envy', 'b.envy']);
+    discovery.stop();
+  });
+
+  it('stays quiet while nothing drifts', async () => {
+    const { discovery } = build(webContainer('a', 3001));
+    await discovery.start();
+    let changes = 0;
+    discovery.routes.on('change', () => changes++);
+    await vi.advanceTimersByTimeAsync(RECONCILE_INTERVAL_MS * 3);
+    expect(changes).toBe(0); // no drift → no rebuild → no renderer churn
+    discovery.stop();
+  });
+
+  it('survives Docker being down mid-tick and recovers on the next', async () => {
+    const { docker, discovery } = build(webContainer('a', 3001));
+    await discovery.start();
+    docker.listContainers = async () => { throw new Error('ECONNREFUSED'); };
+    await vi.advanceTimersByTimeAsync(RECONCILE_INTERVAL_MS);
+
+    docker.listContainers = FakeDocker.prototype.listContainers.bind(docker);
+    docker.containers = [webContainer('b', 3002)];
+    await vi.advanceTimersByTimeAsync(RECONCILE_INTERVAL_MS);
+    expect(discovery.routes.list().map((r) => r.host)).toEqual(['b.envy']);
+    discovery.stop();
+  });
+
+  it('does not stack a second interval across resume()', async () => {
+    const { docker, discovery } = build(webContainer('a', 3001));
+    await discovery.start();
+    await discovery.resume();
+    docker.listCalls = 0;
+    await vi.advanceTimersByTimeAsync(RECONCILE_INTERVAL_MS);
+    expect(docker.listCalls).toBe(1); // one tick → one list, not one per start/resume
+    discovery.stop();
+  });
+
+  it('stops polling after stop()', async () => {
+    const { docker, discovery } = build(webContainer('a', 3001));
+    await discovery.start();
+    discovery.stop();
+    docker.containers = [webContainer('b', 3002)];
+    await vi.advanceTimersByTimeAsync(RECONCILE_INTERVAL_MS * 2);
+    expect(discovery.routes.list().map((r) => r.host)).toEqual(['a.envy']);
   });
 });

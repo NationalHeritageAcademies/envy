@@ -143,6 +143,7 @@ export class Engine {
 
   async stop(): Promise<void> {
     await this.stopProxy();
+    this.discovery?.stop(); // cancel the reconcile/reprobe timers
     // Drop our hosts-file entries so stale names don't point at a dead proxy.
     clearHosts();
   }
